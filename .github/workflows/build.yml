@@ -7,5 +7,10 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
     - uses: actions/checkout@v1
-    - name: Build and test
-      run: ./configure
+    - name: Configure
+      run: bash configure
+    - name: Build
+      run: make images
+    - name: Verify
+      run: ./build/*/images/jdk/bin/java -version
+
