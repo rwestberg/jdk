@@ -1,0 +1,11 @@
+name: Build and test
+
+on: [push, pull_request]
+
+jobs:
+  linux:
+    runs-on: 'ubuntu-latest'
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build and test
+      run: ./configure
