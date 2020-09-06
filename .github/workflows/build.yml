@@ -7,7 +7,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     env: 
       BOOT_JDK_VERSION: '14.0.2'
-      BOOT_JDK_FILENAME: openjdk-${{ env.BOOT_JDK_VERSION }}_linux-x64_bin.tar.gz
+      BOOT_JDK_FILENAME: ${{ format('openjdk-{0}_linux-x64_bin.tar.gz', env.BOOT_JDK_VERSION }}
       BOOT_JDK_URL: https://download.java.net/java/GA/jdk${{ env.BOOT_JDK_VERSION }}/205943a0976c4ed48cb16f1043c5c647/12/GPL/${{ env.BOOT_JDK_FILENAME }}
       BOOT_JDK_SHA256: '91310200f072045dc6cef2c8c23e7e6387b37c46e9de49623ce0fa461a24623d'
       BOOT_JDK_PATH: ${{ env.HOME }}/bootjdk/${BOOT_JDK_VERSION}
