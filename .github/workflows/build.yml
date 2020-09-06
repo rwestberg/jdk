@@ -6,7 +6,7 @@ jobs:
   linux:
     runs-on: 'ubuntu-latest'
     env: 
-      BOOT_JDK_VERSION: 14.0.2
+      BOOT_JDK_VERSION: '14.0.2'
       BOOT_JDK_FILENAME: openjdk-${BOOT_JDK_VERSION}_linux-x64_bin.tar.gz
       BOOT_JDK_URL: https://download.java.net/java/GA/jdk${BOOT_JDK_VERSION}/205943a0976c4ed48cb16f1043c5c647/12/GPL/${BOOT_JDK_FILENAME}
       BOOT_JDK_PATH: ${HOME}/bootjdk/${BOOT_JDK_VERSION}
@@ -19,6 +19,9 @@ jobs:
 
     - name: Download boot JDK
       run: curl -L "${BOOT_JDK_URL}" -o "${BOOT_JDK_FILENAME}"
+
+    - name: Create boot JDK destination folder
+      run: mkdir -p "${BOOT_JDK_PATH}"
 
     - name: Unpack boot JDK
       run: tar -xf "${BOOT_JDK_FILENAME}" -C "${BOOT_JDK_PATH}"
