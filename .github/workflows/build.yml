@@ -30,7 +30,7 @@ jobs:
       run: tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
 
     - name: Install dependencies
-      run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev
+      run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev ibasound2-dev
 
     - name: Configure
       run: bash configure --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}
