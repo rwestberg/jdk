@@ -7,7 +7,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     env: 
       BOOT_JDK_FILENAME: openjdk-14.0.2_linux-x64_bin.tar.gz
-      BOOT_JDK_URL: https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/${{ env.BOOT_JDK_URL }}
+      BOOT_JDK_URL: https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/${BOOT_JDK_FILENAME}
     steps:
     - name: Checkout the source
       uses: actions/checkout@v2
