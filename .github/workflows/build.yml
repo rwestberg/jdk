@@ -7,10 +7,9 @@ jobs:
     runs-on: 'ubuntu-latest'
     env: 
       BOOT_JDK_VERSION: '14.0.2'
-      BOOT_JDK_FILENAME: ${{ format('openjdk-{0}_linux-x64_bin.tar.gz', env.BOOT_JDK_VERSION) }}
-      BOOT_JDK_URL: https://download.java.net/java/GA/jdk${{ env.BOOT_JDK_VERSION }}/205943a0976c4ed48cb16f1043c5c647/12/GPL/${{ env.BOOT_JDK_FILENAME }}
+      BOOT_JDK_FILENAME: 'openjdk-14.0.2_linux-x64_bin.tar.gz'
+      BOOT_JDK_URL: 'https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_linux-x64_bin.tar.gz'
       BOOT_JDK_SHA256: '91310200f072045dc6cef2c8c23e7e6387b37c46e9de49623ce0fa461a24623d'
-      BOOT_JDK_PATH: ${{ env.HOME }}/bootjdk/${BOOT_JDK_VERSION}
     steps:
     - name: Checkout the source
       uses: actions/checkout@v2
@@ -19,10 +18,10 @@ jobs:
 #      uses: actions/cache@v2
 
     - name: Create boot JDK destination folder
-      run: mkdir -p "${{ env.BOOT_JDK_PATH }}"
+      run: mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
 
     - name: Download boot JDK
-      run: wget -O "${{ env.HOME }}/bootjdk/${{ env.BOOT_JDK_FILENAME }}" "${{ env.BOOT_JDK_URL }}"
+      run: wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
 
     - name: Verify boot JDK
       run: echo "${BOOT_JDK_SHA256} ${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
