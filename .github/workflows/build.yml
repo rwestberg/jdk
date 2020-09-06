@@ -18,14 +18,14 @@ jobs:
 #    - name: Restore boot JDK from cache
 #      uses: actions/cache@v2
 
+    - name: Create boot JDK destination folder
+      run: mkdir -p "${BOOT_JDK_PATH}"
+
     - name: Download boot JDK
-      run: curl -L "${BOOT_JDK_URL}" -o "${BOOT_JDK_FILENAME}"
+      run: wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
 
     - name: Verify boot JDK
       run: echo "${BOOT_JDK_SHA256} ${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
-
-    - name: Create boot JDK destination folder
-      run: mkdir -p "${BOOT_JDK_PATH}"
 
     - name: Unpack boot JDK
       run: tar -xf "${BOOT_JDK_FILENAME}" -C "${BOOT_JDK_PATH}"
