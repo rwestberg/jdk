@@ -19,10 +19,10 @@ jobs:
 #      uses: actions/cache@v2
 
     - name: Create boot JDK destination folder
-      run: mkdir -p "${BOOT_JDK_PATH}"
+      run: mkdir -p "{{ env.BOOT_JDK_PATH }}"
 
     - name: Download boot JDK
-      run: wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
+      run: wget -O "{{ env.HOME }}/bootjdk/{{ env.BOOT_JDK_FILENAME }}" "{{ env.BOOT_JDK_URL }}"
 
     - name: Verify boot JDK
       run: echo "${BOOT_JDK_SHA256} ${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
