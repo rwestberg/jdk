@@ -50,11 +50,14 @@ jobs:
     - name: Perform a sanity check
       run: ./build/*/images/jdk/bin/java -version
 
+    - name: Create an archive of the build
+      run: tar cvz ~/linux_x86_64_release.tar.gz build/
+
     - name: Persist the build for testing in parallel
       uses: actions/upload-artifact@v2
       with:
         name: linux_x86_64_release
-        path: ${{ github.workspace }}/build/
+        path: ~/linux_x86_64_release.tar.gz
   
   test_tier1_linux_x86_64_release:
     name: Run tier1 tests for Linux x86_64 Release
@@ -64,11 +67,20 @@ jobs:
       - name: Checkout the source
         uses: actions/checkout@v2
 
-      - name: Restore the build
+      - name: Restore boot JDK from cache
+        uses: actions/cache@v2
+        with:
+          path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
+          key: bootjdk-${{ env.BOOT_JDK_VERSION }}-v3
+
+      - name: Download the persisted build
         uses: actions/download-artifact@v2
         with:
           name: linux_x86_64_release
-          path: ${{ github.workspace }}/build/
+          path: ~/
+
+      - name: Restore the build folder
+        run: tar xfz ~/linux_x86_64_release.tar.gz
 
       - name: Run tier1 tests
         run: make test-tier1
