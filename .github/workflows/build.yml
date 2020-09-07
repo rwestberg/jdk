@@ -14,20 +14,28 @@ jobs:
     - name: Checkout the source
       uses: actions/checkout@v2
 
-#    - name: Restore boot JDK from cache
-#      uses: actions/cache@v2
+    - name: Restore boot JDK from cache
+      id: bootjdk
+      uses: actions/cache@v2
+      with:
+        path: ${{ env.HOME }}/bootjdk/${{ env.BOOT_JDK_VERSION }}
+        key: bootjdk-${{ env.BOOT_JDK_VERSION }}
 
     - name: Create boot JDK destination folder
       run: mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
+      if: steps.bootjdk.outcome != success
 
     - name: Download boot JDK
       run: wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
+      if: steps.bootjdk.outcome != success
 
     - name: Verify boot JDK
       run: echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
+      if: steps.bootjdk.outcome != success
 
     - name: Unpack boot JDK
       run: tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
+      if: steps.bootjdk.outcome != success
 
     - name: Install dependencies
       run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
