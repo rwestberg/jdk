@@ -42,8 +42,9 @@ jobs:
     - name: Configure
       run: bash configure --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}
 
-#    - name: Build
-#      run: make images
+    - name: Build
+      run: make images
+      
 #    - name: Verify
 #      run: ./build/*/images/jdk/bin/java -version
 
