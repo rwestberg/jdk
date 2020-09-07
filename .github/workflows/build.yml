@@ -22,20 +22,19 @@ jobs:
         key: bootjdk-${{ env.BOOT_JDK_VERSION }}
 
     - name: Create boot JDK destination folder
-      run: mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
-      if: steps.bootjdk.outcome != 'success'
+      run: '[ -f "${HOME}/bootjdk/${BOOT_JDK_VERSION}-verified.txt" ] || mkdir -p "${HOME}/bootjdk/${BOOT_JDK_VERSION}'
 
     - name: Download boot JDK
-      run: wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
-      if: steps.bootjdk.outcome != 'success'
+      run: '[ -f "${HOME}/bootjdk/${BOOT_JDK_VERSION}-verified.txt" ] || wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"'
 
     - name: Verify boot JDK
-      run: echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
-      if: steps.bootjdk.outcome != 'success'
+      run: '[ -f "${HOME}/bootjdk/${BOOT_JDK_VERSION}-verified.txt" ] || echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -'
 
     - name: Unpack boot JDK
-      run: tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
-      if: steps.bootjdk.outcome != 'success'
+      run: '[ -f "${HOME}/bootjdk/${BOOT_JDK_VERSION}-verified.txt" ] || tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"'
+
+    - name: Mark the boot JDK unpack as successful
+      run: '[ -f "${HOME}/bootjdk/${BOOT_JDK_VERSION}-verified.txt" ] || touch "${HOME}/bootjdk/${BOOT_JDK_VERSION}-verified.txt"'
 
     - name: Install dependencies
       run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
