@@ -3,7 +3,8 @@ name: Build and test
 on: [push, pull_request]
 
 jobs:
-  linux:
+  build_linux_x86_64_release:
+    name: Build Linux x86_64 Release
     runs-on: 'ubuntu-latest'
     env: 
       BOOT_JDK_VERSION: '14.0.2'
@@ -43,9 +44,32 @@ jobs:
     - name: Configure
       run: bash configure --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}
 
-#    - name: Build
-#      run: make images
+    - name: Build
+      run: make images
       
-#    - name: Verify
-#      run: ./build/*/images/jdk/bin/java -version
+    - name: Perform a sanity check
+      run: ./build/*/images/jdk/bin/java -version
+
+    - name: Persist the build for testing in parallel
+      uses: actions/upload-artifact@v2
+      with:
+        name: linux_x86_64_release
+        path: ${{ github.workspace }}/build/
+  
+  test_tier1_linux_x86_64_release:
+    name: Run tier1 tests for Linux x86_64 Release
+    needs: build_linux_x86_64_release
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: Checkout the source
+        uses: actions/checkout@v2
+
+      - name: Restore the build
+        uses: actions/download-artifact@v2
+        with:
+          name: linux_x86_64_release
+          path: ${{ github.workspace }}/build/
+
+      - name: Run tier1 tests
+        run: make test-tier1
 
