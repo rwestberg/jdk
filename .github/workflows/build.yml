@@ -51,7 +51,7 @@ jobs:
       run: ./build/*/images/jdk/bin/java -version
 
     - name: Create an archive of the build
-      run: tar cvz ~/linux_x86_64_release.tar.gz build/
+      run: tar cfz ~/linux_x86_64_release.tar.gz build/
 
     - name: Persist the build for testing in parallel
       uses: actions/upload-artifact@v2
