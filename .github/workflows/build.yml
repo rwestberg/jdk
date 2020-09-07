@@ -22,7 +22,7 @@ jobs:
         key: bootjdk-${{ env.BOOT_JDK_VERSION }}
 
     - name: Create boot JDK destination folder
-      run: '[ -f "${HOME}/bootjdk/${BOOT_JDK_VERSION}-verified.txt" ] || mkdir -p "${HOME}/bootjdk/${BOOT_JDK_VERSION}'
+      run: '[ -f "${HOME}/bootjdk/${BOOT_JDK_VERSION}-verified.txt" ] || mkdir -p "${HOME}/bootjdk/${BOOT_JDK_VERSION}"'
 
     - name: Download boot JDK
       run: '[ -f "${HOME}/bootjdk/${BOOT_JDK_VERSION}-verified.txt" ] || wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"'
