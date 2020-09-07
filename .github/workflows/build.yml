@@ -18,8 +18,8 @@ jobs:
       id: bootjdk
       uses: actions/cache@v2
       with:
-        path: ${{ env.HOME }}/bootjdk/${{ env.BOOT_JDK_VERSION }}
-        key: bootjdk-${{ env.BOOT_JDK_VERSION }}-v2
+        path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
+        key: bootjdk-${{ env.BOOT_JDK_VERSION }}-v3
 
     - name: Create boot JDK destination folder
       run: mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
@@ -37,11 +37,11 @@ jobs:
       run: tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
-#    - name: Install dependencies
-#      run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
+    - name: Install dependencies
+      run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
 
-#    - name: Configure
-#      run: bash configure --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}
+    - name: Configure
+      run: bash configure --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}
 
 #    - name: Build
 #      run: make images
