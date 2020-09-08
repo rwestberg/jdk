@@ -83,5 +83,5 @@ jobs:
         run: tar xfz ~/linux_x86_64_release.tar.gz
 
       - name: Run tier1 tests
-        run: make test-tier1
+        run: make test-tier1 CONF_CHECK=ignore
 
