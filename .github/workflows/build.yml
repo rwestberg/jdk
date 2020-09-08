@@ -7,20 +7,51 @@ env:
   JTREG_VERSION: 'jtreg5.1-b01'
 
 jobs:
-  prerequisites:
-    name: Downlod and build prerequisites
+  jtreg:
+    name: Download and build jtreg
     runs-on: 'ubuntu-latest'
+    steps:
+    - name: Restore jtreg from cache
+      id: jtreg
+      uses: actions/cache@v2
+      with:
+        path: ~/jtreg/
+        key: jtreg-${{ env.JTREG_VERSION }}-v1
+
+    - name: Checkout the jtreg source
+      uses: actions/checkout@v2
+      with:
+        repository: 'openjdk/jtreg'
+        ref: ${{ env.JTREG_VERSION }}
+      if: steps.jtreg.outputs.cache-hit != 'true'
+
+    - name: Build jtreg
+      run: sh make/build-all.sh ${JAVA_HOME}
+      if: steps.jtreg.outputs.cache-hit != 'true'
+
+    - name: Populate jtreg destination folder
+      run: cp -av build/images/jtreg/* ~/jtreg/
+      if: steps.jtreg.outputs.cache-hit != 'true'
+
+  linux_x86_64_release:
+    name: Linux x86_64 Release
+    runs-on: 'ubuntu-latest'
+    needs: jtreg
     env:
       BOOT_JDK_FILENAME: 'openjdk-14.0.2_linux-x64_bin.tar.gz'
       BOOT_JDK_URL: 'https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_linux-x64_bin.tar.gz'
       BOOT_JDK_SHA256: '91310200f072045dc6cef2c8c23e7e6387b37c46e9de49623ce0fa461a24623d'
+
     steps:
+    - name: Checkout the source
+      uses: actions/checkout@v2
+
     - name: Restore boot JDK from cache
       id: bootjdk
       uses: actions/cache@v2
       with:
         path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-        key: bootjdk-${{ env.BOOT_JDK_VERSION }}-v3
+        key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
 
     - name: Create boot JDK destination folder
       run: mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
@@ -37,42 +68,6 @@ jobs:
     - name: Unpack boot JDK
       run: tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
       if: steps.bootjdk.outputs.cache-hit != 'true'
-
-    - name: Restore jtreg from cache
-      id: jtreg
-      uses: actions/cache@v2
-      with:
-        path: ~/jtreg/
-        key: jtreg-${{ env.JTREG_VERSION }}-v3
-
-    - name: Checkout the jtreg source
-      uses: actions/checkout@v2
-      with:
-        repository: 'openjdk/jtreg'
-      if: steps.jtreg.outputs.cache-hit != 'true'
-
-    - name: Build jtreg
-      run: sh make/build-all.sh ${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}
-      if: steps.jtreg.outputs.cache-hit != 'true'
-
-    - name: Populate jtreg destination folder
-      run: cp -av build/images/jtreg/* ~/jtreg/
-      if: steps.jtreg.outputs.cache-hit != 'true'
-
-  linux_x86_64_release:
-    name: Linux x86_64 Release
-    runs-on: 'ubuntu-latest'
-    needs: prerequisites
-    steps:
-    - name: Checkout the source
-      uses: actions/checkout@v2
-
-    - name: Restore boot JDK from cache
-      id: bootjdk
-      uses: actions/cache@v2
-      with:
-        path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-        key: bootjdk-${{ env.BOOT_JDK_VERSION }}-v3
 
     - name: Restore jtreg from cache
       id: jtreg
