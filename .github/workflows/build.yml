@@ -11,7 +11,7 @@ jobs:
     name: Download and build jtreg
     runs-on: 'ubuntu-latest'
     steps:
-    - name: Restore jtreg from cache
+    - name: Check if a jtreg image is present in the cache
       id: jtreg
       uses: actions/cache@v2
       with:
@@ -74,6 +74,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/jtreg/
+        key: jtreg-${{ env.JTREG_VERSION }}-v1
 
     - name: Install dependencies
       run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
