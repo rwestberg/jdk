@@ -80,7 +80,7 @@ jobs:
       run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
 
     - name: Configure
-      run: bash configure --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=~/jtreg
+      run: bash configure --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg
 
 #    - name: Build
 #      run: make images
