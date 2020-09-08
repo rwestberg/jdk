@@ -1,4 +1,4 @@
-name: Build and test
+name: Submit tests
 
 on: [push]
 
@@ -82,18 +82,12 @@ jobs:
     - name: Configure
       run: bash configure --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg
 
-#    - name: Build
-#      run: make images
-        
-#    - name: Perform a sanity check
-#      run: ./build/*/images/jdk/bin/java -version
-
     - name: Run tier1 tests
       run: make test-tier1
 
-    - name: Persist the build log
+    - name: Persist the build log on errors
       uses: actions/upload-artifact@v2
-      if: ${{ always() }}
+      if: ${{ failure() }}
       with:
         name: linux_x86_64_release_build_log
         path: ./build/*/build.log
