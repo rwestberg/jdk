@@ -29,8 +29,8 @@ jobs:
       run: sh make/build-all.sh ${JAVA_HOME}
       if: steps.jtreg.outputs.cache-hit != 'true'
 
-    - name: Populate jtreg destination folder
-      run: cp -av build/images/jtreg/* ~/jtreg/
+    - name: Move jtreg image to destination folder
+      run: mv build/images/jtreg ~/
       if: steps.jtreg.outputs.cache-hit != 'true'
 
   linux_x86_64_release:
