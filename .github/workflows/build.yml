@@ -7,7 +7,7 @@ env:
   JTREG_VERSION: 'jtreg5.1-b01'
 
 jobs:
-  prerequisistes:
+  prerequisites:
     name: Downlod and build prerequisites
     runs-on: 'ubuntu-latest'
     env:
