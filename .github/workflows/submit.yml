@@ -1,6 +1,6 @@
 name: Submit tests
 
-on: workflow_dispatch
+on: push
     
 env:
   BOOT_JDK_VERSION: '14.0.2'
@@ -46,6 +46,8 @@ jobs:
     steps:
     - name: Checkout the source
       uses: actions/checkout@v2
+      with:
+        path: main
 
     - name: Restore boot JDK from cache
       id: bootjdk
@@ -82,16 +84,16 @@ jobs:
       with:
         repository: 'google/googletest'
         ref: ${{ env.GTEST_VERSION }}
-        path: ~/gtest
+        path: gtest
 
     - name: Install dependencies
       run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
 
     - name: Configure
-      run: bash configure --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg --with-gtest=${HOME}/gtest
+      run: bash main/configure --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg --with-gtest=${CWD}/gtest
 
     - name: Run tier1 tests
-      run: make test-tier1
+      run: make -C main test-tier1
 
     - name: Persist build and test logs
       uses: actions/upload-artifact@v2
@@ -99,6 +101,6 @@ jobs:
       with:
         name: linux_x86_64_release_build_log
         path: |
-          ./build/*/build.log
-          ./build/*/test-results/
-          ./build/*/test-resupport/
+          main/build/*/build.log
+          main/build/*/test-results/
+          main/build/*/test-resupport/
