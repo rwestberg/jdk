@@ -7,8 +7,8 @@ env:
   JTREG_VERSION: 'jtreg5.1-b01'
 
 jobs:
-  jtreg:
-    name: Download and build jtreg
+  prerequisites_shared:
+    name: Provide shared prerequisites
     runs-on: 'ubuntu-latest'
     steps:
     - name: Check if a jtreg image is present in the cache
@@ -36,7 +36,7 @@ jobs:
   linux_x86_64_release:
     name: Linux x86_64 Release
     runs-on: 'ubuntu-latest'
-    needs: jtreg
+    needs: prerequisites_shared
     env:
       BOOT_JDK_FILENAME: 'openjdk-14.0.2_linux-x64_bin.tar.gz'
       BOOT_JDK_URL: 'https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_linux-x64_bin.tar.gz'
