@@ -47,7 +47,7 @@ jobs:
     - name: Checkout the source
       uses: actions/checkout@v2
       with:
-        path: main
+        path: jdk
 
     - name: Restore boot JDK from cache
       id: bootjdk
@@ -90,10 +90,12 @@ jobs:
       run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
 
     - name: Configure
-      run: bash main/configure --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg --with-gtest=${CWD}/gtest
+      run: bash configure --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg --with-gtest=${GITHUB_WORKSPACE}/gtest
+      working-directory: ${GITHUB_WORKSPACE}/jdk
 
     - name: Run tier1 tests
-      run: make -C main test-tier1
+      run: make test-tier1
+      working-directory: ${GITHUB_WORKSPACE}/jdk
 
     - name: Persist build and test logs
       uses: actions/upload-artifact@v2
@@ -101,6 +103,6 @@ jobs:
       with:
         name: linux_x86_64_release_build_log
         path: |
-          main/build/*/build.log
-          main/build/*/test-results/
-          main/build/*/test-resupport/
+          jdk/build/*/build.log
+          jdk/build/*/test-results/
+          jdk/build/*/test-resupport/
