@@ -2,10 +2,10 @@ name: Build and test
 
 on: [push, pull_request]
 
-jobs:
-  env:
-     BOOT_JDK_VERSION: '14.0.2'
+env:
+  BOOT_JDK_VERSION: '14.0.2'
 
+jobs:
   build_linux_x86_64_release:
     name: Build Linux x86_64 Release
     runs-on: 'ubuntu-latest'
