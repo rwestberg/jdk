@@ -91,11 +91,11 @@ jobs:
 
     - name: Configure
       run: bash configure --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg --with-gtest=${GITHUB_WORKSPACE}/gtest
-      working-directory: ${GITHUB_WORKSPACE}/jdk
+      working-directory: jdk
 
     - name: Run tier1 tests
       run: make test-tier1
-      working-directory: ${GITHUB_WORKSPACE}/jdk
+      working-directory: jdk
 
     - name: Persist build and test logs
       uses: actions/upload-artifact@v2
