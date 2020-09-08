@@ -1,7 +1,7 @@
 name: Submit tests
 
-on: [push]
-
+on: workflow_dispatch
+    
 env:
   BOOT_JDK_VERSION: '14.0.2'
   JTREG_VERSION: 'jtreg5.1-b01'
