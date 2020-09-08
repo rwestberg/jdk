@@ -1,13 +1,13 @@
 name: Build and test
 
-on: [push, pull_request]
+on: [push]
 
 env:
   BOOT_JDK_VERSION: '14.0.2'
 
 jobs:
-  build_linux_x86_64_release:
-    name: Build Linux x86_64 Release
+  linux_x86_64_release:
+    name: Build and test Linux x86_64 Release
     runs-on: 'ubuntu-latest'
     env: 
       BOOT_JDK_FILENAME: 'openjdk-14.0.2_linux-x64_bin.tar.gz'
@@ -48,42 +48,17 @@ jobs:
 
     - name: Build
       run: make images
-      
+
+    - name: Persist the build log
+      uses: actions/upload-artifact@v2
+      if: ${{ always() }}
+      with:
+        name: linux_x86_64_release_build_log
+        path: ./build/*/build.log
+        
     - name: Perform a sanity check
       run: ./build/*/images/jdk/bin/java -version
 
-    - name: Create an archive of the build
-      run: tar cfz ~/linux_x86_64_release.tar.gz build/
-
-    - name: Persist the build for testing in parallel
-      uses: actions/upload-artifact@v2
-      with:
-        name: linux_x86_64_release
-        path: ~/linux_x86_64_release.tar.gz
-  
-  test_tier1_linux_x86_64_release:
-    name: Run tier1 tests for Linux x86_64 Release
-    needs: build_linux_x86_64_release
-    runs-on: 'ubuntu-latest'
-    steps:
-      - name: Checkout the source
-        uses: actions/checkout@v2
-
-      - name: Restore boot JDK from cache
-        uses: actions/cache@v2
-        with:
-          path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-          key: bootjdk-${{ env.BOOT_JDK_VERSION }}-v3
-
-      - name: Download the persisted build
-        uses: actions/download-artifact@v2
-        with:
-          name: linux_x86_64_release
-          path: ~/
-
-      - name: Restore the build folder
-        run: tar xfz ~/linux_x86_64_release.tar.gz
-
-      - name: Run tier1 tests
-        run: make test-tier1 CONF_CHECK=ignore
+    - name: Run tier1 tests
+      run: make test-tier1
 
