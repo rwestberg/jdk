@@ -125,7 +125,7 @@ jobs:
           jdk/build/*/test-resupport/
 
   windows_x86_64:
-    if: false
+    if: true
     name: Windows x86_64
     runs-on: 'windows-latest'
     needs: prerequisites_shared
@@ -207,7 +207,7 @@ jobs:
           jdk/build/*/test-resupport/
 
   mac_x86_64:
-    if: false
+    if: true
     name: macOS x86_64
     runs-on: 'macos-latest'
     needs: prerequisites_shared
