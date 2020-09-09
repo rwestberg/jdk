@@ -159,11 +159,7 @@ jobs:
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: Look at cygwin
-      run: dir "$HOME\cygwin"
-      if: steps.cygwin.outputs.cache-hit != 'true'
-
-    - name: Look at cygwin64
-      run: dir "$HOME\cygwin\cygwin64"
+      run: Get-ChildItem -Recurse "$HOME\cygwin"
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: Checkout the source
