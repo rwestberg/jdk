@@ -3,11 +3,18 @@ name: Submit tests
 on:
   push:
     branches-ignore: [master]
+  workflow_dispatch:
+    inputs:
+      tests:
+        description: 'Tests to run (see testing.md for examples). Defaults to "tier1".'
+        required: true
+        default: 'tier1'
     
 env:
   BOOT_JDK_VERSION: '14.0.2'
   JTREG_VERSION: 'jtreg5.1-b01'
   GTEST_VERSION: 'release-1.8.1'
+  TESTS: ${{ github.event.inputs.tests }}
 
 jobs:
   prerequisites_shared:
@@ -96,7 +103,7 @@ jobs:
       working-directory: jdk
 
     - name: Run tier1 tests
-      run: make test-tier1
+      run: make test TEST="${TESTS}"
       working-directory: jdk
 
     - name: Persist build and test logs
