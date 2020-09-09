@@ -155,7 +155,7 @@ jobs:
 #      if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Install cygwin
-      run: '& "$HOME/cygwin/setup-x86_64.exe" --root "$HOME/cygwin/cygwin64" --no-admin --quiet-mode'
+      run: '& "$HOME/cygwin/setup-x86_64.exe" --root "$HOME/cygwin/cygwin64" --quiet-mode'
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: Checkout the source
