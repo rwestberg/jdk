@@ -135,6 +135,24 @@ jobs:
       BOOT_JDK_SHA256: '20600c0bda9d1db9d20dbe1ab656a5f9175ffb990ef3df6af5d994673e4d8ff9'
 
     steps:
+    - name: Restore cygwin from cache
+      id: cygwin
+      uses: actions/cache@v2
+      with:
+        path: ~/cygwin
+        key: cygwin-v1      
+
+    - name: Download cygwin
+      run: curl -L "https://www.cygwin.com/setup-x86_64.exe" "$env:HOME/cygwin/$env:setup-x86_64.exe"
+      if: steps.cygwin.outputs.cache-hit != 'true'
+
+#    - name: Verify cygwin
+#      run: $FileHash = Get-FileHash -Algorithm SHA256 "$env:HOME/bootjdk/$env:BOOT_JDK_FILENAME" ; $FileHash.Hash -eq $env:BOOT_JDK_SHA256
+#      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Install cygwin
+      run: $env:HOME/cygwin/$env:setup-x86_64.exe --root $env:HOME/cygwin/cygwin64 --no-admin --quiet-mode
+
     - name: Checkout the source
       uses: actions/checkout@v2
       with:
