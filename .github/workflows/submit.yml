@@ -14,7 +14,7 @@ env:
   BOOT_JDK_VERSION: '14.0.2'
   JTREG_VERSION: 'jtreg5.1-b01'
   GTEST_VERSION: 'release-1.8.1'
-  TESTS: ${{ fromJson('[''tier1', github.event.inputs.tests]')[github.event.inputs.tests != ''] }}
+  TESTS: ${{ fromJson('[''tier1'', github.event.inputs.tests]')[github.event.inputs.tests != ''] }}
 
 jobs:
   prerequisites_shared:
