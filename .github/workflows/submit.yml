@@ -171,19 +171,19 @@ jobs:
         key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
 
     - name: Create boot JDK destination folder
-      run: mkdir -p $env:HOME/bootjdk/$env:BOOT_JDK_VERSION
+      run: mkdir -p "$HOME\bootjdk\$env:BOOT_JDK_VERSION"
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Download boot JDK
-      run: curl -L $env:BOOT_JDK_URL -o "$env:HOME/bootjdk/$env:BOOT_JDK_FILENAME"
+      run: '& curl -L "$env:BOOT_JDK_URL" -o "$HOME/bootjdk/$env:BOOT_JDK_FILENAME"'
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Verify boot JDK
-      run: $FileHash = Get-FileHash -Algorithm SHA256 "$env:HOME/bootjdk/$env:BOOT_JDK_FILENAME" ; $FileHash.Hash -eq $env:BOOT_JDK_SHA256
+      run: $FileHash = Get-FileHash -Algorithm SHA256 "$HOME/bootjdk/$env:BOOT_JDK_FILENAME" ; $FileHash.Hash -eq $env:BOOT_JDK_SHA256
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Unpack boot JDK
-      run: tar -xf "$env:HOME/bootjdk/$env:BOOT_JDK_FILENAME" -C "$env:HOME/bootjdk/$env:BOOT_JDK_VERSION"
+      run: '& tar -xf "$HOME/bootjdk/$env:BOOT_JDK_FILENAME" -C "$HOME/bootjdk/$env:BOOT_JDK_VERSION"'
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Restore jtreg from cache
@@ -204,7 +204,7 @@ jobs:
 #      run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
 
     - name: Configure
-      run: bash configure --enable-debug --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA} --with-version-build=0 --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg --with-gtest=${GITHUB_WORKSPACE}/gtest
+      run: '& $HOME\cygwin\cygwin64\bin\bash configure --enable-debug "--with-version-opt=$env:GITHUB_ACTOR-$env:GITHUB_SHA" --with-version-build=0 "--with-boot-jdk=$HOME/bootjdk/$env:BOOT_JDK_VERSION/jdk-$env:BOOT_JDK_VERSION" "--with-jtreg=$HOME/jtreg" "--with-gtest=$env:GITHUB_WORKSPACE/gtest"'
       working-directory: jdk
 
     - name: 'Run manually selected tests (${{ github.event.inputs.tests }})'
