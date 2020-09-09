@@ -148,11 +148,11 @@ jobs:
         key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
 
     - name: Create boot JDK destination folder
-      run: mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
+      run: mkdir -p $env:HOME/bootjdk/$env:BOOT_JDK_VERSION
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Download boot JDK
-      run: curl -L "${BOOT_JDK_URL}" -o "${HOME}/bootjdk/${BOOT_JDK_FILENAME}"
+      run: curl -L $env:BOOT_JDK_URL -o "$env:HOME/bootjdk/$env:BOOT_JDK_FILENAME"
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Verify boot JDK
@@ -237,9 +237,9 @@ jobs:
       run: wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
-    - name: Verify boot JDK
-      run: echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | shasum -a 256 -c >/dev/null -
-      if: steps.bootjdk.outputs.cache-hit != 'true'
+#    - name: Verify boot JDK
+#      run: echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | shasum -a 256 -c >/dev/null -
+#      if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Unpack boot JDK
       run: tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
