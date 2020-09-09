@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tests:
-        description: 'Tests to run (see testing.md for examples). Defaults to "tier1".'
+        description: 'Tests to run (see testing.md for examples)'
         required: true
         default: 'tier1'
     
@@ -102,7 +102,7 @@ jobs:
       run: bash configure --enable-debug --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA} --with-version-build=0 --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg --with-gtest=${GITHUB_WORKSPACE}/gtest
       working-directory: jdk
 
-    - name: Run tier1 tests
+    - name: 'Run tests: "${{ github.event.inputs.tests }}"'
       run: make test TEST="${TESTS}"
       working-directory: jdk
 
