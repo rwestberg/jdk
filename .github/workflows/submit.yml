@@ -102,7 +102,7 @@ jobs:
       run: bash configure --enable-debug --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA} --with-version-build=0 --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg --with-gtest=${GITHUB_WORKSPACE}/gtest
       working-directory: jdk
 
-    - name: 'Run manually selected tests: "${{ env.TESTS }}"'
+    - name: 'Run manually selected tests (${{ env.TESTS }})'
       run: make test TEST="${TESTS}"
       working-directory: jdk
       if: env.TESTS != ''
