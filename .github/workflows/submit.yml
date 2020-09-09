@@ -143,7 +143,7 @@ jobs:
         key: cygwin-v1      
 
     - name: Download cygwin
-      run: curl -L "https://www.cygwin.com/setup-x86_64.exe" -o "$env:HOME/cygwin/$env:setup-x86_64.exe"
+      run: curl -L "https://www.cygwin.com/setup-x86_64.exe" -o "$env:HOME/cygwin/setup-x86_64.exe"
       if: steps.cygwin.outputs.cache-hit != 'true'
 
 #    - name: Verify cygwin
@@ -225,7 +225,7 @@ jobs:
           jdk/build/*/test-resupport/
 
   mac_x86_64:
-    if: true
+    if: false
     name: macOS x86_64
     runs-on: 'macos-latest'
     needs: prerequisites_shared
