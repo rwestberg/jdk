@@ -143,7 +143,7 @@ jobs:
         key: cygwin-v1      
 
     - name: Download cygwin
-      run: curl -L "https://www.cygwin.com/setup-x86_64.exe" -o "$env:HOME/cygwin/setup-x86_64.exe"
+      run: curl -L "https://www.cygwin.com/setup-x86_64.exe" -o "$HOME/cygwin/setup-x86_64.exe"
       if: steps.cygwin.outputs.cache-hit != 'true'
 
 #    - name: Verify cygwin
@@ -151,7 +151,7 @@ jobs:
 #      if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Install cygwin
-      run: $env:HOME/cygwin/$env:setup-x86_64.exe --root $env:HOME/cygwin/cygwin64 --no-admin --quiet-mode
+      run: $HOME/cygwin/$env:setup-x86_64.exe --root $HOME/cygwin/cygwin64 --no-admin --quiet-mode
 
     - name: Checkout the source
       uses: actions/checkout@v2
