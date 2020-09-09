@@ -155,7 +155,7 @@ jobs:
 #      if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Install cygwin
-      run: '$p = Start-Process $HOME\cygwin\setup-x86_64.exe -ArgumentList "$HOME/cygwin/setup-x86_64.exe --quiet-mode --download --site http://mirrors.kernel.org/sourceware/cygwin" -wait -NoNewWindow -PassThru'
+      run: '$p = Start-Process $HOME\cygwin\setup-x86_64.exe -ArgumentList "--root "$HOME/cygwin/cygwin64 --quiet-mode --download --site http://mirrors.kernel.org/sourceware/cygwin" -wait -NoNewWindow -PassThru'
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: Checkout the source
