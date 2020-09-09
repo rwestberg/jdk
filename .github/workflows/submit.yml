@@ -14,7 +14,7 @@ env:
   BOOT_JDK_VERSION: '14.0.2'
   JTREG_VERSION: 'jtreg5.1-b01'
   GTEST_VERSION: 'release-1.8.1'
-  TESTS: ${{ github.event.inputs.tests }}
+  TESTS: ${{ fromJson('[''tier1', github.event.inputs.tests]')[github.event.inputs.tests != ''] }}
 
 jobs:
   prerequisites_shared:
@@ -102,7 +102,7 @@ jobs:
       run: bash configure --enable-debug --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA} --with-version-build=0 --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg --with-gtest=${GITHUB_WORKSPACE}/gtest
       working-directory: jdk
 
-    - name: 'Run tests: "${{ github.event.inputs.tests }}"'
+    - name: 'Run tests: "${{ env.TESTS }}"'
       run: make test TEST="${TESTS}"
       working-directory: jdk
 
