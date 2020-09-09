@@ -142,6 +142,10 @@ jobs:
         path: ~/cygwin
         key: cygwin-v1      
 
+    - name: Create cygwin destination folder
+      run: mkdir -p $HOME/cygwin
+      if: steps.cygwin.outputs.cache-hit != 'true'
+
     - name: Download cygwin
       run: curl -L "https://www.cygwin.com/setup-x86_64.exe" -o "$HOME/cygwin/setup-x86_64.exe"
       if: steps.cygwin.outputs.cache-hit != 'true'
