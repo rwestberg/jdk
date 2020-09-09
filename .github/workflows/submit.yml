@@ -2,7 +2,7 @@ name: Submit tests
 
 on:
   push:
-    branches-ignore: [gh_actions]
+    branches-ignore: [master]
     
 env:
   BOOT_JDK_VERSION: '14.0.2'
