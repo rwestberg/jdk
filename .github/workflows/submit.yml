@@ -156,11 +156,11 @@ jobs:
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Verify boot JDK
-      run: $FileHash = Get-FileHash -Algorithm SHA256 "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" ; $FileHash.Hash -eq $BOOT_JDK_SHA256
+      run: $FileHash = Get-FileHash -Algorithm SHA256 "$env:HOME/bootjdk/$env:BOOT_JDK_FILENAME" ; $FileHash.Hash -eq $env:BOOT_JDK_SHA256
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Unpack boot JDK
-      run: tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
+      run: tar -xf "$env:HOME/bootjdk/$env:BOOT_JDK_FILENAME" -C "$env:HOME/bootjdk/$env:BOOT_JDK_VERSION"
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Restore jtreg from cache
@@ -177,8 +177,8 @@ jobs:
         ref: ${{ env.GTEST_VERSION }}
         path: gtest
 
-    - name: Install dependencies
-      run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
+#    - name: Install dependencies
+#      run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
 
     - name: Configure
       run: bash configure --enable-debug --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA} --with-version-build=0 --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg --with-gtest=${GITHUB_WORKSPACE}/gtest
@@ -259,8 +259,8 @@ jobs:
         ref: ${{ env.GTEST_VERSION }}
         path: gtest
 
-    - name: Install dependencies
-      run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
+#    - name: Install dependencies
+#      run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
 
     - name: Configure
       run: bash configure --enable-debug --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA} --with-version-build=0 --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg --with-gtest=${GITHUB_WORKSPACE}/gtest
