@@ -1,6 +1,8 @@
 name: Submit tests
 
-on: push
+on:
+  push:
+    branches-ignore: [gh_pages]
     
 env:
   BOOT_JDK_VERSION: '14.0.2'
@@ -101,7 +103,7 @@ jobs:
       uses: actions/upload-artifact@v2
       if: ${{ always() }}
       with:
-        name: linux_x86_64_release_build_log
+        name: linux_x86_64_logs
         path: |
           jdk/build/*/build.log
           jdk/build/*/test-results/
