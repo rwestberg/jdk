@@ -43,6 +43,7 @@ jobs:
       if: steps.jtreg.outputs.cache-hit != 'true'
 
   linux_x86_64:
+    if: false
     name: Linux x86_64
     runs-on: 'ubuntu-latest'
     needs: prerequisites_shared
@@ -122,3 +123,167 @@ jobs:
           jdk/build/*/build.log
           jdk/build/*/test-results/
           jdk/build/*/test-resupport/
+
+  windows_x86_64:
+    if: false
+    name: Windows x86_64
+    runs-on: 'windows-latest'
+    needs: prerequisites_shared
+    env:
+      BOOT_JDK_FILENAME: 'openjdk-14.0.2_windows-x64_bin.zip'
+      BOOT_JDK_URL: 'https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_windows-x64_bin.zip'
+      BOOT_JDK_SHA256: '20600c0bda9d1db9d20dbe1ab656a5f9175ffb990ef3df6af5d994673e4d8ff9'
+
+    steps:
+    - name: Checkout the source
+      uses: actions/checkout@v2
+      with:
+        path: jdk
+
+    - name: Restore boot JDK from cache
+      id: bootjdk
+      uses: actions/cache@v2
+      with:
+        path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
+        key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
+
+    - name: Create boot JDK destination folder
+      run: mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Download boot JDK
+      run: wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Verify boot JDK
+      run: echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Unpack boot JDK
+      run: tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Restore jtreg from cache
+      id: jtreg
+      uses: actions/cache@v2
+      with:
+        path: ~/jtreg/
+        key: jtreg-${{ env.JTREG_VERSION }}-v1
+
+    - name: Checkout gtest sources
+      uses: actions/checkout@v2
+      with:
+        repository: 'google/googletest'
+        ref: ${{ env.GTEST_VERSION }}
+        path: gtest
+
+    - name: Install dependencies
+      run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
+
+    - name: Configure
+      run: bash configure --enable-debug --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA} --with-version-build=0 --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg --with-gtest=${GITHUB_WORKSPACE}/gtest
+      working-directory: jdk
+
+    - name: 'Run manually selected tests (${{ github.event.inputs.tests }})'
+      run: make test TEST="${TESTS}"
+      working-directory: jdk
+      env: 
+        TESTS: ${{ github.event.inputs.tests }}
+      if: github.event.inputs.tests != ''
+
+    - name: 'Run default test selection (tier1)'
+      run: make test TEST=tier1
+      working-directory: jdk
+      if: github.event.inputs.tests == ''
+
+    - name: Persist build and test logs
+      uses: actions/upload-artifact@v2
+      if: ${{ always() }}
+      with:
+        name: linux_x86_64_logs
+        path: |
+          jdk/build/*/build.log
+          jdk/build/*/test-results/
+          jdk/build/*/test-resupport/
+
+  mac_x86_64:
+    if: false
+    name: macOS x86_64
+    runs-on: 'macos-latest'
+    needs: prerequisites_shared
+    env:
+      BOOT_JDK_FILENAME: 'openjdk-14.0.2_osx-x64_bin.tar.gz'
+      BOOT_JDK_URL: 'https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_osx-x64_bin.tar.gz'
+      BOOT_JDK_SHA256: '386a96eeef63bf94b450809d69ceaa1c9e32a97230e0a120c1b41786b743ae84'
+
+    steps:
+    - name: Checkout the source
+      uses: actions/checkout@v2
+      with:
+        path: jdk
+
+    - name: Restore boot JDK from cache
+      id: bootjdk
+      uses: actions/cache@v2
+      with:
+        path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
+        key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
+
+    - name: Create boot JDK destination folder
+      run: mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Download boot JDK
+      run: wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Verify boot JDK
+      run: echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Unpack boot JDK
+      run: tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Restore jtreg from cache
+      id: jtreg
+      uses: actions/cache@v2
+      with:
+        path: ~/jtreg/
+        key: jtreg-${{ env.JTREG_VERSION }}-v1
+
+    - name: Checkout gtest sources
+      uses: actions/checkout@v2
+      with:
+        repository: 'google/googletest'
+        ref: ${{ env.GTEST_VERSION }}
+        path: gtest
+
+    - name: Install dependencies
+      run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
+
+    - name: Configure
+      run: bash configure --enable-debug --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA} --with-version-build=0 --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg --with-gtest=${GITHUB_WORKSPACE}/gtest
+      working-directory: jdk
+
+    - name: 'Run manually selected tests (${{ github.event.inputs.tests }})'
+      run: make test TEST="${TESTS}"
+      working-directory: jdk
+      env: 
+        TESTS: ${{ github.event.inputs.tests }}
+      if: github.event.inputs.tests != ''
+
+    - name: 'Run default test selection (tier1)'
+      run: make test TEST=tier1
+      working-directory: jdk
+      if: github.event.inputs.tests == ''
+
+    - name: Persist build and test logs
+      uses: actions/upload-artifact@v2
+      if: ${{ always() }}
+      with:
+        name: linux_x86_64_logs
+        path: |
+          jdk/build/*/build.log
+          jdk/build/*/test-results/
+          jdk/build/*/test-resupport/          
