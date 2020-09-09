@@ -162,6 +162,10 @@ jobs:
       run: Get-ChildItem -Recurse "$HOME\cygwin"
       if: steps.cygwin.outputs.cache-hit != 'true'
 
+    - name: Look at home
+      run: Get-ChildItem -Recurse
+      if: steps.cygwin.outputs.cache-hit != 'true'
+
     - name: Checkout the source
       uses: actions/checkout@v2
       with:
