@@ -166,40 +166,6 @@ jobs:
       run: Get-ChildItem -Recurse "C:\Users\runneradmin\cygwin\cygwin64\bin"
       if: steps.cygwin.outputs.cache-hit != 'true'
 
-    - name: Try running cygwin
-      run: 'Start-Process -FilePath "$HOME\cygwin\cygwin64\cygwin.bat" -ArgumentList "echo hello there" -Wait -NoNewWindow'
-      if: ${{ always() }}
-
-    - name: Check default path
-      run: 'echo $env:PATH'
-      if: steps.cygwin.outputs.cache-hit != 'true'
-
-    - name: Try setting path
-      run: 'echo %PATH%'
-      shell: cmd
-      env: 
-        PATH: '%HOME%\cygwin\cygwin64\bin;${{ env.PATH }}'
-      if: steps.cygwin.outputs.cache-hit != 'true'
-
-    - name: Try running cygwin 1
-      run: 'C:\Users\runneradmin\cygwin\cygwin64\bin\bash.exe echo hello there'
-      shell: cmd
-      env: 
-        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin;;${{ env.PATH }}'
-      if: ${{ always() }}
-
-    - name: Try running cygwin 2
-      run: '& "$HOME\cygwin\cygwin64\bin\bash.exe" -c echo hello there'
-      env: 
-        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin;;${{ env.PATH }}'
-      if: ${{ always() }}
-
-    - name: Try running cygwin 3
-      run: '& "$HOME\cygwin\cygwin64\bin\mintty.exe" bash.exe -c echo hello there'
-      env: 
-        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin;;${{ env.PATH }}'
-      if: ${{ always() }}
-
     - name: Look at cygwin
       run: Get-ChildItem -Recurse "$HOME\cygwin"
       if: steps.cygwin.outputs.cache-hit != 'true'
@@ -252,17 +218,22 @@ jobs:
     - name: Configure
       run: '& $HOME\cygwin\cygwin64\bin\bash configure --enable-debug "--with-version-opt=$env:GITHUB_ACTOR-$env:GITHUB_SHA" --with-version-build=0 "--with-boot-jdk=$HOME/bootjdk/$env:BOOT_JDK_VERSION/jdk-$env:BOOT_JDK_VERSION" "--with-jtreg=$HOME/jtreg" "--with-gtest=$env:GITHUB_WORKSPACE/gtest"'
       working-directory: jdk
+      env:
+        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin'
 
     - name: 'Run manually selected tests (${{ github.event.inputs.tests }})'
       run: make test TEST="${TESTS}"
       working-directory: jdk
       env: 
+        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin'
         TESTS: ${{ github.event.inputs.tests }}
       if: github.event.inputs.tests != ''
 
     - name: 'Run default test selection (tier1)'
       run: make test TEST=tier1
       working-directory: jdk
+      env:
+        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin'
       if: github.event.inputs.tests == ''
 
     - name: Persist build and test logs
