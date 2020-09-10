@@ -237,8 +237,8 @@ jobs:
           jdk/build/*/test-results/
           jdk/build/*/test-resupport/
 
-  mac_x86_64:
-    if: false
+  macos_x86_64:
+    if: true
     name: macOS x86_64
     runs-on: 'macos-latest'
     needs: prerequisites_shared
@@ -258,7 +258,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-        key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
+        key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v2
 
     - name: Create boot JDK destination folder
       run: mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
@@ -268,9 +268,9 @@ jobs:
       run: wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
-#    - name: Verify boot JDK
-#      run: echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | shasum -a 256 -c >/dev/null -
-#      if: steps.bootjdk.outputs.cache-hit != 'true'
+    - name: Verify boot JDK
+      run: echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | shasum -a 256 -c >/dev/null -
+      if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Unpack boot JDK
       run: tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
@@ -289,9 +289,6 @@ jobs:
         repository: 'google/googletest'
         ref: ${{ env.GTEST_VERSION }}
         path: gtest
-
-#    - name: Install dependencies
-#      run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
 
     - name: Configure
       run: bash configure --enable-debug --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA} --with-version-build=0 --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}.jdk/Contents/Home --with-jtreg=${HOME}/jtreg --with-gtest=${GITHUB_WORKSPACE}/gtest
@@ -313,7 +310,7 @@ jobs:
       uses: actions/upload-artifact@v2
       if: ${{ always() }}
       with:
-        name: linux_x86_64_logs
+        name: macos_x86_64_logs
         path: |
           jdk/build/*/build.log
           jdk/build/*/test-results/
