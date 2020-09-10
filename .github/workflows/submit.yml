@@ -162,6 +162,10 @@ jobs:
       run: type "$HOME\cygwin\cygwin64\cygwin.bat"
       if: steps.cygwin.outputs.cache-hit != 'true'
 
+    - name: Look at cygwin bin
+      run: Get-ChildItem -Recurse "C:\Users\runneradmin\cygwin\cygwin64\bin"
+      if: steps.cygwin.outputs.cache-hit != 'true'
+
     - name: Try running cygwin
       run: 'Start-Process -FilePath "$HOME\cygwin\cygwin64\cygwin.bat" -ArgumentList "echo hello there" -Wait -NoNewWindow'
       if: steps.cygwin.outputs.cache-hit != 'true'
