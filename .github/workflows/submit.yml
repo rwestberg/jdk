@@ -175,21 +175,21 @@ jobs:
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: Try setting path
-      run: 'echo $env:PATH'
+      run: 'echo %PATH%'
       env: 
-        PATH: '%HOME%\cygwin\cygwin64\bin'
+        PATH: '%HOME%\cygwin\cygwin64\bin;${{ env.PATH }}'
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: Try running cygwin 2
       run: '& "$HOME\cygwin\cygwin64\bin\bash.exe" echo hello there'
       env: 
-        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin'
+        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin;;${{ env.PATH }}'
       if: ${{ always() }}
 
     - name: Try running cygwin 3
       run: '& "$HOME\cygwin\cygwin64\bin\mintty.exe" bash.exe echo hello there'
       env: 
-        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin'
+        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin;;${{ env.PATH }}'
       if: ${{ always() }}
 
     - name: Look at cygwin
