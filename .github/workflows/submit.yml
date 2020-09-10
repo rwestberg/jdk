@@ -155,7 +155,11 @@ jobs:
 #      if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Install cygwin
-      run: 'Start-Process -FilePath "$HOME\cygwin\setup-x86_64.exe" -ArgumentList "--root $HOME/cygwin/cygwin64 --quiet-mode --download --site http://mirrors.kernel.org/sourceware/cygwin --no-desktop --no-shortcuts --no-startmenu --no-admin" -Wait -NoNewWindow'
+      run: 'Start-Process -FilePath "$HOME\cygwin\setup-x86_64.exe" -ArgumentList "--quiet-mode --download --site http://mirrors.kernel.org/sourceware/cygwin --no-desktop --no-shortcuts --no-startmenu --no-admin" -Wait -NoNewWindow'
+      if: steps.cygwin.outputs.cache-hit != 'true'
+
+    - name: Upgrade cygwin
+      run: 'Start-Process -FilePath "$HOME\cygwin\setup-x86_64.exe" -ArgumentList "--quiet-mode --download --site http://mirrors.kernel.org/sourceware/cygwin --no-desktop --no-shortcuts --no-startmenu --no-admin" -Wait -NoNewWindow'
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: Look at cygwin
@@ -164,6 +168,10 @@ jobs:
 
     - name: Look at home
       run: Get-ChildItem -Recurse
+      if: steps.cygwin.outputs.cache-hit != 'true'
+
+    - name: Look at root
+      run: Get-ChildItem -Recurse "C:\"
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: Checkout the source
