@@ -155,11 +155,7 @@ jobs:
 #      if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Install cygwin
-      run: 'Start-Process -FilePath "$HOME\cygwin\setup-x86_64.exe" -ArgumentList "--quiet-mode --local-package-dir $HOME\cygwin--download --site http://mirrors.kernel.org/sourceware/cygwin --no-desktop --no-shortcuts --no-startmenu --no-admin --verbose" -Wait -NoNewWindow'
-      if: steps.cygwin.outputs.cache-hit != 'true'
-
-    - name: Upgrade cygwin
-      run: 'Start-Process -FilePath "$HOME\cygwin\setup-x86_64.exe" -ArgumentList "--quiet-mode --upgrade-also --local-package-dir $HOME\cygwin --download --site http://mirrors.kernel.org/sourceware/cygwin --no-desktop --no-shortcuts --no-startmenu --no-admin --verbose" -Wait -NoNewWindow'
+      run: 'Start-Process -FilePath "$HOME\cygwin\setup-x86_64.exe" -ArgumentList "--quiet-mode --root $HOME\cygwin\cygwin64 --local-package-dir $HOME\cygwin --site http://mirrors.kernel.org/sourceware/cygwin --no-desktop --no-shortcuts --no-startmenu --no-admin --verbose" -Wait -NoNewWindow'
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: Look at cygwin
