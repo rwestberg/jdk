@@ -238,7 +238,7 @@ jobs:
           jdk/build/*/test-resupport/
 
   macos_x86_64:
-    if: true
+    if: false
     name: macOS x86_64
     runs-on: 'macos-latest'
     needs: prerequisites_shared
