@@ -171,7 +171,7 @@ jobs:
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: Look at root
-      run: Get-ChildItem -Recurse "C:\"
+      run: Get-ChildItem "C:\"
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: Checkout the source
