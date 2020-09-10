@@ -159,11 +159,11 @@ jobs:
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: Try running cygwin
-      run: 'Start-Process -FilePath "$HOME\cygwin\cygwin64\bin\bash.exe" -ArgumentList "echo hello there" -Wait -NoNewWindow'
+      run: 'Start-Process -FilePath "$HOME\cygwin\cygwin64\cygwin.bat -ArgumentList "echo hello there" -Wait -NoNewWindow'
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: Try running cygwin 2
-      run: '& "$HOME\cygwin\cygwin64\bin\bash" echo hello there'
+      run: '& "$HOME\cygwin\cygwin64\cygwin.bat" echo hello there'
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: Look at cygwin
