@@ -166,6 +166,12 @@ jobs:
       run: 'Start-Process -FilePath "$HOME\cygwin\cygwin64\cygwin.bat" -ArgumentList "echo hello there" -Wait -NoNewWindow'
       if: steps.cygwin.outputs.cache-hit != 'true'
 
+    - name: Try setting path
+      run: 'echo $env:PATH'
+      env: 
+        PATH: '${{ env.HOME }}\cygwin\cygwin64\bin;%PATH%'
+      if: steps.cygwin.outputs.cache-hit != 'true'
+      
     - name: Try running cygwin 2
       run: '& "$HOME\cygwin\cygwin64\bin\bash.exe" echo hello there'
       env: 
