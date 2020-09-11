@@ -158,9 +158,24 @@ jobs:
       run: 'Start-Process -FilePath "$HOME\cygwin\setup-x86_64.exe" -ArgumentList "--quiet-mode --packages autoconf --root $HOME\cygwin\cygwin64 --local-package-dir $HOME\cygwin --site http://mirrors.kernel.org/sourceware/cygwin --no-desktop --no-shortcuts --no-startmenu --no-admin" -Wait -NoNewWindow'
       if: steps.cygwin.outputs.cache-hit != 'true'
 
-    - name: What's the source
-      run: type "$HOME\cygwin\cygwin64\cygwin.bat"
-      if: steps.cygwin.outputs.cache-hit != 'true'
+    - name: What's the path
+      run: echo %PATH%
+      shell: cmd
+      if: steps.cygwin.outputs.cache-hit != 'true'      
+
+    - name: What's the path
+      run: echo %PATH%
+      shell: cmd
+      env:
+        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin;${{ env.PATH }}'
+      if: steps.cygwin.outputs.cache-hit != 'true'      
+
+    - name: What's the path
+      run: echo %PATH%
+      shell: cmd
+      env:
+        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin;%PATH%'
+      if: steps.cygwin.outputs.cache-hit != 'true'      
 
     - name: Look at cygwin bin
       run: Get-ChildItem -Recurse "C:\Users\runneradmin\cygwin\cygwin64\bin"
