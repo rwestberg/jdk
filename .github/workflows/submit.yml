@@ -42,6 +42,13 @@ jobs:
       run: mv build/images/jtreg ~/
       if: steps.jtreg.outputs.cache-hit != 'true'
 
+    - name: Store jtreg for later steps
+      uses: actions/upload-artifact@v2
+      with:
+        name: jtreg_${{ env.JTREG_VERSION }}-v1
+        path: |
+          ~/jtreg/
+
   linux_x86_64:
     if: false
     name: Linux x86_64
@@ -224,19 +231,18 @@ jobs:
       run: '& tar -xf "$HOME/bootjdk/$env:BOOT_JDK_FILENAME" -C "$HOME/bootjdk/$env:BOOT_JDK_VERSION"'
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
-    - name: Restore jtreg from cache
-      id: jtreg
-      uses: actions/cache@v2
-      with:
-        path: ~/jtreg/
-        key: jtreg-${{ env.JTREG_VERSION }}-v1
-
     - name: Checkout gtest sources
       uses: actions/checkout@v2
       with:
         repository: 'google/googletest'
         ref: ${{ env.GTEST_VERSION }}
         path: gtest
+
+    - uses: actions/download-artifact@v2
+      with:
+        name: jtreg_${{ env.JTREG_VERSION }}-v1
+        path: |
+          ~/jtreg/
 
 #    - name: Install dependencies
 #      run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
