@@ -242,24 +242,25 @@ jobs:
 #      run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
 
     - name: Configure
-      run: '& $HOME\cygwin\cygwin64\bin\bash configure --enable-debug "--with-version-opt=$env:GITHUB_ACTOR-$env:GITHUB_SHA" --with-version-build=0 "--with-boot-jdk=$HOME/bootjdk/$env:BOOT_JDK_VERSION/jdk-$env:BOOT_JDK_VERSION" "--with-jtreg=$HOME/jtreg" "--with-gtest=$env:GITHUB_WORKSPACE/gtest"'
+      run: |
+        $env:Path = "C:\Users\runneradmin\cygwin\cygwin64\bin;$env:Path"
+        & $HOME\cygwin\cygwin64\bin\bash configure --enable-debug "--with-version-opt=$env:GITHUB_ACTOR-$env:GITHUB_SHA" --with-version-build=0 "--with-boot-jdk=$HOME/bootjdk/$env:BOOT_JDK_VERSION/jdk-$env:BOOT_JDK_VERSION" "--with-jtreg=$HOME/jtreg" "--with-gtest=$env:GITHUB_WORKSPACE/gtest"
       working-directory: jdk
-      env:
-        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin'
 
     - name: 'Run manually selected tests (${{ github.event.inputs.tests }})'
-      run: make test TEST="${TESTS}"
+      run: |
+        $env:Path = "C:\Users\runneradmin\cygwin\cygwin64\bin;$env:Path"
+        & make test TEST="${TESTS}"
       working-directory: jdk
       env: 
-        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin'
         TESTS: ${{ github.event.inputs.tests }}
       if: github.event.inputs.tests != ''
 
     - name: 'Run default test selection (tier1)'
-      run: make test TEST=tier1
+      run: |
+        $env:Path = "C:\Users\runneradmin\cygwin\cygwin64\bin;$env:Path"
+        & make test TEST=tier1
       working-directory: jdk
-      env:
-        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin'
       if: github.event.inputs.tests == ''
 
     - name: Persist build and test logs
