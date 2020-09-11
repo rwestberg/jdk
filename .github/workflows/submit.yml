@@ -48,9 +48,9 @@ jobs:
         name: jtreg_${{ env.JTREG_VERSION }}-v1
         path: ~/jtreg/
 
-  linux_x86_64:
+  linux_x86_64_build:
     if: true
-    name: Linux x86_64
+    name: Linux x86_64 Build
     runs-on: 'ubuntu-latest'
     needs: prerequisites_shared
     env:
@@ -107,30 +107,73 @@ jobs:
       run: bash configure --enable-debug --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA} --with-version-build=0 --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg --with-gtest=${GITHUB_WORKSPACE}/gtest
       working-directory: jdk
 
-    - name: 'Run manually selected tests (${{ github.event.inputs.tests }})'
-      run: make test TEST="${TESTS}"
+    - name: Build
+      run: make product-bundles test-bundles"
       working-directory: jdk
-      env: 
-        TESTS: ${{ github.event.inputs.tests }}
-      if: github.event.inputs.tests != ''
 
-    - name: 'Run default test selection (tier1)'
-      run: make test TEST=tier1
-      working-directory: jdk
-      if: github.event.inputs.tests == ''
+    - name: Store bundles for later steps
+      uses: actions/upload-artifact@v2
+      with:
+        name: jdk-linux-x86_64-fastdebug-${{ env.GITHUB_SHA }}
+        path: jdk/build/*/bundles/
 
-    - name: Persist build and test logs
+    - name: Persist build logs
       uses: actions/upload-artifact@v2
       if: ${{ always() }}
       with:
-        name: linux_x86_64_logs
+        name: linux_x86_64_build_logs
+        path: |
+          jdk/build/*/build.log
+          jdk/build/*/test-results/
+          jdk/build/*/test-resupport/
+
+  linux_x86_64_test:
+    if: true
+    name: Linux x86_64 Test
+    runs-on: 'ubuntu-latest'
+    needs: linux_x86_64_test
+
+    steps:
+    - name: Checkout the source
+      uses: actions/checkout@v2
+      with:
+        path: jdk
+
+    - name: Restore boot JDK from cache
+      id: bootjdk
+      uses: actions/cache@v2
+      with:
+        path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
+        key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
+
+    - name: Restore jtreg artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: jtreg_${{ env.JTREG_VERSION }}-v1
+        path: ~/jtreg/
+
+    - name: Restore build artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: jdk-linux-x86_64-fastdebug-${{ env.GITHUB_SHA }}
+        path: jdk/build/*/bundles/
+
+    - name: Test
+      run: make test-prebuilt BOOT_JDK=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} JT_HOME=${HOME}/jtreg JDK_IMAGE_DIR= TEST_IMAGE_DIR
+      working-directory: jdk
+
+    - name: Persist build logs
+      uses: actions/upload-artifact@v2
+      if: ${{ always() }}
+      with:
+        name: linux_x86_64_build_logs
         path: |
           jdk/build/*/build.log
           jdk/build/*/test-results/
           jdk/build/*/test-resupport/
 
   windows_x86_64:
-    if: true
+    if: false
     name: Windows x86_64
     runs-on: 'windows-latest'
     needs: prerequisites_shared
@@ -233,7 +276,7 @@ jobs:
           jdk/build/*/test-resupport/
 
   macos_x86_64:
-    if: true
+    if: false
     name: macOS x86_64
     runs-on: 'macos-latest'
     needs: prerequisites_shared
