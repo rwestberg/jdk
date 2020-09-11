@@ -160,20 +160,6 @@ jobs:
     - name: Install cygwin
       run: 'Start-Process -FilePath "$HOME\cygwin\setup-x86_64.exe" -ArgumentList "--quiet-mode --packages autoconf,make,zip,unzip --root $HOME\cygwin\cygwin64 --local-package-dir $HOME\cygwin --site http://mirrors.kernel.org/sourceware/cygwin --no-desktop --no-shortcuts --no-startmenu --no-admin" -Wait -NoNewWindow'
       if: steps.cygwin.outputs.cache-hit != 'true'
-
-    - name: What's the path
-      run: |
-        echo $env:Path
-        $env:Path = "C:\Users\runneradmin\cygwin\cygwin64\bin;$env:Path"
-        echo $env:Path
-      if: steps.cygwin.outputs.cache-hit != 'true'      
-
-    - name: What's the path
-      run: |
-        echo $env:Path
-        $env:Path = "$HOME\cygwin\cygwin64\bin;$env:Path"
-        echo $env:Path
-      if: steps.cygwin.outputs.cache-hit != 'true'      
       
     - name: Checkout the source
       uses: actions/checkout@v2
@@ -219,13 +205,13 @@ jobs:
 
     - name: Configure
       run: |
-        $env:Path = "C:\Users\runneradmin\cygwin\cygwin64\bin;$env:Path"
+        $env:Path = "$HOME\cygwin\cygwin64\bin;$env:Path"
         & $HOME\cygwin\cygwin64\bin\bash configure --enable-debug "--with-version-opt=$env:GITHUB_ACTOR-$env:GITHUB_SHA" --with-version-build=0 "--with-boot-jdk=$HOME/bootjdk/$env:BOOT_JDK_VERSION/jdk-$env:BOOT_JDK_VERSION" "--with-jtreg=$HOME/jtreg" "--with-gtest=$env:GITHUB_WORKSPACE/gtest"
       working-directory: jdk
 
     - name: 'Run manually selected tests (${{ github.event.inputs.tests }})'
       run: |
-        $env:Path = "C:\Users\runneradmin\cygwin\cygwin64\bin;$env:Path"
+        $env:Path = "$HOME\cygwin\cygwin64\bin;$env:Path"
         & make test TEST="${TESTS}"
       working-directory: jdk
       env: 
@@ -234,7 +220,7 @@ jobs:
 
     - name: 'Run default test selection (tier1)'
       run: |
-        $env:Path = "C:\Users\runneradmin\cygwin\cygwin64\bin;$env:Path"
+        $env:Path = "$HOME\cygwin\cygwin64\bin;$env:Path"
         & make test TEST=tier1
       working-directory: jdk
       if: github.event.inputs.tests == ''
