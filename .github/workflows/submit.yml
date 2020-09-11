@@ -108,7 +108,7 @@ jobs:
       working-directory: jdk
 
     - name: Build
-      run: make product-bundles test-bundles"
+      run: make product-bundles test-bundles
       working-directory: jdk
 
     - name: Store bundles for later steps
@@ -156,7 +156,7 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: jdk-linux-x86_64-fastdebug-${{ env.GITHUB_SHA }}
-        path: jdk/build/*/bundles/
+        path: jdk/build/
 
     - name: Test
       run: make test-prebuilt BOOT_JDK=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} JT_HOME=${HOME}/jtreg JDK_IMAGE_DIR= TEST_IMAGE_DIR
