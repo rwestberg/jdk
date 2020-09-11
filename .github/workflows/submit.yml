@@ -88,12 +88,12 @@ jobs:
       run: tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
-    - name: Restore jtreg from cache
-      id: jtreg
-      uses: actions/cache@v2
+    - name: Restore jtreg artifact
+      uses: actions/download-artifact@v2
       with:
-        path: ~/jtreg/
-        key: jtreg-${{ env.JTREG_VERSION }}-v1
+        name: jtreg_${{ env.JTREG_VERSION }}-v1
+        path: |
+          ~/jtreg/
 
     - name: Checkout gtest sources
       uses: actions/checkout@v2
@@ -157,52 +157,24 @@ jobs:
       run: '& curl -L "https://www.cygwin.com/setup-x86_64.exe" -o "$HOME/cygwin/setup-x86_64.exe"'
       if: steps.cygwin.outputs.cache-hit != 'true'
 
-#    - name: Verify cygwin
-#      run: $FileHash = Get-FileHash -Algorithm SHA256 "$env:HOME/bootjdk/$env:BOOT_JDK_FILENAME" ; $FileHash.Hash -eq $env:BOOT_JDK_SHA256
-#      if: steps.bootjdk.outputs.cache-hit != 'true'
-
     - name: Install cygwin
       run: 'Start-Process -FilePath "$HOME\cygwin\setup-x86_64.exe" -ArgumentList "--quiet-mode --packages autoconf,make,zip,unzip --root $HOME\cygwin\cygwin64 --local-package-dir $HOME\cygwin --site http://mirrors.kernel.org/sourceware/cygwin --no-desktop --no-shortcuts --no-startmenu --no-admin" -Wait -NoNewWindow'
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: What's the path
       run: |
-        echo %PATH%
-        set PATH=C:\Users\runneradmin\cygwin\cygwin64\bin;%PATH%
-        echo %PATH%
-      shell: cmd
+        echo $env:Path
+        $env:Path = "C:\Users\runneradmin\cygwin\cygwin64\bin;$env:Path"
+        echo $env:Path
       if: steps.cygwin.outputs.cache-hit != 'true'      
 
-    - name: What's the path 2
+    - name: What's the path
       run: |
-        echo %PATH%
-        set PATH=%HOME%\cygwin\cygwin64\bin;%PATH%
-        echo %PATH%
-      shell: cmd
+        echo $env:Path
+        $env:Path = "$HOME\cygwin\cygwin64\bin;$env:Path"
+        echo $env:Path
       if: steps.cygwin.outputs.cache-hit != 'true'      
-
-    - name: What's the path
-      run: echo %PATH%
-      shell: cmd
-      env:
-        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin;${{ env.PATH }}'
-      if: steps.cygwin.outputs.cache-hit != 'true'      
-
-    - name: What's the path
-      run: echo %PATH%
-      shell: cmd
-      env:
-        PATH: 'C:\Users\runneradmin\cygwin\cygwin64\bin;%PATH%'
-      if: steps.cygwin.outputs.cache-hit != 'true'      
-
-    - name: Look at cygwin bin
-      run: Get-ChildItem -Recurse "C:\Users\runneradmin\cygwin\cygwin64\bin"
-      if: steps.cygwin.outputs.cache-hit != 'true'
-
-    - name: Look at cygwin
-      run: Get-ChildItem -Recurse "$HOME\cygwin"
-      if: steps.cygwin.outputs.cache-hit != 'true'
-
+      
     - name: Checkout the source
       uses: actions/checkout@v2
       with:
@@ -238,14 +210,12 @@ jobs:
         ref: ${{ env.GTEST_VERSION }}
         path: gtest
 
-    - uses: actions/download-artifact@v2
+    - name: Restore jtreg artifact
+      uses: actions/download-artifact@v2
       with:
         name: jtreg_${{ env.JTREG_VERSION }}-v1
         path: |
           ~/jtreg/
-
-#    - name: Install dependencies
-#      run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
 
     - name: Configure
       run: |
@@ -318,12 +288,12 @@ jobs:
       run: tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
-    - name: Restore jtreg from cache
-      id: jtreg
-      uses: actions/cache@v2
+    - name: Restore jtreg artifact
+      uses: actions/download-artifact@v2
       with:
-        path: ~/jtreg/
-        key: jtreg-${{ env.JTREG_VERSION }}-v1
+        name: jtreg_${{ env.JTREG_VERSION }}-v1
+        path: |
+          ~/jtreg/
 
     - name: Checkout gtest sources
       uses: actions/checkout@v2
