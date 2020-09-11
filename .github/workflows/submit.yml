@@ -35,17 +35,18 @@ jobs:
       if: steps.jtreg.outputs.cache-hit != 'true'
 
     - name: Build jtreg
-      run: |
-        sh make/build-all.sh ${JAVA_HOME}
-        mv build/images/jtreg ~/
+      run: sh make/build-all.sh ${JAVA_HOME}
+      if: steps.jtreg.outputs.cache-hit != 'true'
+
+    - name: Move jtreg image to destination folder
+      run: mv build/images/jtreg ~/
       if: steps.jtreg.outputs.cache-hit != 'true'
 
     - name: Store jtreg for later steps
       uses: actions/upload-artifact@v2
       with:
         name: jtreg_${{ env.JTREG_VERSION }}-v1
-        path: |
-          ~/jtreg/
+        path: ~/jtreg/
 
   linux_x86_64:
     if: true
@@ -70,12 +71,20 @@ jobs:
         path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
         key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
 
-    - name: Download and extract boot JDK
-      run: |
-        mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
-        wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
-        echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
-        tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
+    - name: Create boot JDK destination folder
+      run: mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Download boot JDK
+      run: wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Verify boot JDK
+      run: echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Unpack boot JDK
+      run: tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Restore jtreg artifact
@@ -138,10 +147,12 @@ jobs:
         path: ~/cygwin/cygwin64
         key: cygwin-v1      
 
+    - name: Create cygwin destination folder
+      run: mkdir -p $HOME\cygwin
+      if: steps.cygwin.outputs.cache-hit != 'true'
+
     - name: Download cygwin
-      run: |
-        mkdir -p $HOME\cygwin
-        '& curl -L "https://www.cygwin.com/setup-x86_64.exe" -o "$HOME/cygwin/setup-x86_64.exe"'
+      run: '& curl -L "https://www.cygwin.com/setup-x86_64.exe" -o "$HOME/cygwin/setup-x86_64.exe"'
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: Install cygwin
@@ -160,12 +171,20 @@ jobs:
         path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
         key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
 
-    - name: Download and extract boot JDK
-      run: |
-        mkdir -p "$HOME\bootjdk\$env:BOOT_JDK_VERSION"
-        '& curl -L "$env:BOOT_JDK_URL" -o "$HOME/bootjdk/$env:BOOT_JDK_FILENAME"'
-        $FileHash = Get-FileHash -Algorithm SHA256 "$HOME/bootjdk/$env:BOOT_JDK_FILENAME" ; $FileHash.Hash -eq $env:BOOT_JDK_SHA256
-        '& tar -xf "$HOME/bootjdk/$env:BOOT_JDK_FILENAME" -C "$HOME/bootjdk/$env:BOOT_JDK_VERSION"'
+    - name: Create boot JDK destination folder
+      run: mkdir -p "$HOME\bootjdk\$env:BOOT_JDK_VERSION"
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Download boot JDK
+      run: '& curl -L "$env:BOOT_JDK_URL" -o "$HOME/bootjdk/$env:BOOT_JDK_FILENAME"'
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Verify boot JDK
+      run: $FileHash = Get-FileHash -Algorithm SHA256 "$HOME/bootjdk/$env:BOOT_JDK_FILENAME" ; $FileHash.Hash -eq $env:BOOT_JDK_SHA256
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Unpack boot JDK
+      run: '& tar -xf "$HOME/bootjdk/$env:BOOT_JDK_FILENAME" -C "$HOME/bootjdk/$env:BOOT_JDK_VERSION"'
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Checkout gtest sources
@@ -236,12 +255,20 @@ jobs:
         path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
         key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v2
 
-    - name: Download and extract boot JDK
-      run: |
-        mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
-        wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
-        echo "${BOOT_JDK_SHA256}  ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | shasum -a 256 -c >/dev/null -
-        tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
+    - name: Create boot JDK destination folder
+      run: mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Download boot JDK
+      run: wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Verify boot JDK
+      run: echo "${BOOT_JDK_SHA256}  ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | shasum -a 256 -c >/dev/null -
+      if: steps.bootjdk.outputs.cache-hit != 'true'
+
+    - name: Unpack boot JDK
+      run: tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Restore jtreg artifact
