@@ -159,7 +159,18 @@ jobs:
       if: steps.cygwin.outputs.cache-hit != 'true'
 
     - name: What's the path
-      run: echo %PATH%
+      run: |
+        echo %PATH%
+        set PATH=C:\Users\runneradmin\cygwin\cygwin64\bin;%PATH%
+        echo %PATH
+      shell: cmd
+      if: steps.cygwin.outputs.cache-hit != 'true'      
+
+    - name: What's the path
+      run: |
+        echo %PATH%
+        set PATH=%HOME%\cygwin\cygwin64\bin;%PATH%
+        echo %PATH
       shell: cmd
       if: steps.cygwin.outputs.cache-hit != 'true'      
 
