@@ -162,15 +162,15 @@ jobs:
       run: |
         echo %PATH%
         set PATH=C:\Users\runneradmin\cygwin\cygwin64\bin;%PATH%
-        echo %PATH
+        echo %PATH%
       shell: cmd
       if: steps.cygwin.outputs.cache-hit != 'true'      
 
-    - name: What's the path
+    - name: What's the path 2
       run: |
         echo %PATH%
         set PATH=%HOME%\cygwin\cygwin64\bin;%PATH%
-        echo %PATH
+        echo %PATH%
       shell: cmd
       if: steps.cygwin.outputs.cache-hit != 'true'      
 
