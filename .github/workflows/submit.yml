@@ -48,9 +48,9 @@ jobs:
         name: jtreg_${{ env.JTREG_VERSION }}-v1
         path: ~/jtreg/
 
-  linux_x86_64_build:
+  linux_x64_build_debug:
     if: true
-    name: Linux x86_64 Build
+    name: Linux x64 Build Debug
     runs-on: 'ubuntu-latest'
     needs: prerequisites_shared
     env:
@@ -104,17 +104,32 @@ jobs:
       run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
 
     - name: Configure
-      run: bash configure --enable-debug --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA} --with-version-build=0 --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} --with-jtreg=${HOME}/jtreg --with-gtest=${GITHUB_WORKSPACE}/gtest
+      run: >
+        bash configure 
+        --with-conf-name=linux-x64-debug         
+        --enable-debug 
+        --with-target-bits=64 
+        --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA} 
+        --with-version-build=0 
+        --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} 
+        --with-jtreg=${HOME}/jtreg 
+        --with-gtest=${GITHUB_WORKSPACE}/gtest
+        --with-default-make-target="product-bundles test-bundles static-libs-bundles docs-bundles"
+        --enable-full-docs 
+        --with-zlib=system 
+        --enable-jtreg-failure-handler 
+        --with-exclude-translations=de,es,fr,it,ko,pt_BR,sv,ca,tr,cs,sk,ja_JP_A,ja_JP_HA,ja_JP_HI,ja_JP_I,zh_TW,zh_HK 
+        --disable-manpages 
       working-directory: jdk
 
     - name: Build
-      run: make product-bundles test-bundles
+      run: make CONF_NAME=linux-x64-debug
       working-directory: jdk
 
     - name: Store bundles for later steps
       uses: actions/upload-artifact@v2
       with:
-        name: jdk-linux-x86_64-fastdebug-${{ env.GITHUB_SHA }}
+        name: jdk-linux-x64-debug
         path: jdk/build/*/bundles/
 
     - name: Persist build logs
@@ -122,16 +137,13 @@ jobs:
       if: ${{ always() }}
       with:
         name: linux_x86_64_build_logs
-        path: |
-          jdk/build/*/build.log
-          jdk/build/*/test-results/
-          jdk/build/*/test-resupport/
+        path: jdk/build/*/build.log
 
-  linux_x86_64_test:
+  linux_x64_test_debug:
     if: true
-    name: Linux x86_64 Test
+    name: Linux x64 Test Debug
     runs-on: 'ubuntu-latest'
-    needs: linux_x86_64_build
+    needs: linux_x64_build_debug
 
     steps:
     - name: Checkout the source
@@ -155,20 +167,41 @@ jobs:
     - name: Restore build artifacts
       uses: actions/download-artifact@v2
       with:
-        name: jdk-linux-x86_64-fastdebug-${{ env.GITHUB_SHA }}
-        path: jdk/build/
+        name: jdk-linux-x64-debug
+        path: ~/jdk-linux-x64-debug
 
-    - name: Test
-      run: make test-prebuilt BOOT_JDK=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} JT_HOME=${HOME}/jtreg JDK_IMAGE_DIR= TEST_IMAGE_DIR
+    - name: Unpack jdk
+      run: tar xfz ~/jdk-linux-x64-debug/jdk-16-internal+0_linux-x64_bin-debug.tar.gz
+      working-directory: ~/jdk-linux-x64-debug
+
+    - name: Unpack tests
+      run: tar xfz ~/jdk-linux-x64-debug/jdk-16-internal+0_linux-x64_bin-tests-debug.tar.gz
+      working-directory: ~/jdk-linux-x64-debug
+
+    - name: Run tests
+      run: >
+        make
+        CONF_NAME=run-test-prebuilt 
+        test-prebuilt 
+        LOG_CMDLINES=true 
+        JTREG_VERBOSE=fail,error,time 
+        TEST=open/test/hotspot/jtreg/:tier1_compiler_2 
+        TEST_OPTS_JAVA_OPTIONS= 
+        JTREG_KEYWORDS="!headful"
+      env:
+        BOOT_JDK=${{ env.HOME }}/bootjdk/${{ env.BOOT_JDK_VERSION }}/jdk-${{ env.BOOT_JDK_VERSION }}
+        JT_HOME=${{ env.HOME }}/jtreg
+        TEST_IMAGE_DIR={{ env.HOME }}/jdk-linux-x64-debug/
+        JDK_IMAGE_DIR={{ env.HOME }}/jdk-linux-x64-debug/jdk-16/fastdebug
+
       working-directory: jdk
 
-    - name: Persist build logs
+    - name: Persist test logs
       uses: actions/upload-artifact@v2
       if: ${{ always() }}
       with:
-        name: linux_x86_64_build_logs
+        name: linux_x86_64_test_logs
         path: |
-          jdk/build/*/build.log
           jdk/build/*/test-results/
           jdk/build/*/test-resupport/
 
