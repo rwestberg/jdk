@@ -53,8 +53,9 @@ jobs:
     if: true
 
     strategy:
-      os: [ubuntu-latest]
-      flavor: [debug]
+      matrix:
+        os: [ubuntu-latest]
+        flavor: [debug]
       include:
       - os: ubuntu-latest
         platform: linux
