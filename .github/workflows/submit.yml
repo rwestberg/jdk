@@ -16,8 +16,8 @@ env:
   GTEST_VERSION: 'release-1.8.1'
 
 jobs:
-  prerequisites_shared:
-    name: Shared prerequisites
+  prerequisites:
+    name: Prerequisites
     runs-on: 'ubuntu-latest'
     steps:
     - name: Check if a jtreg image is present in the cache
@@ -48,11 +48,11 @@ jobs:
         name: jtreg_${{ env.JTREG_VERSION }}-v1
         path: ~/jtreg/
 
-  linux_x64_build_debug:
+  linux_x64_build:
     if: true
-    name: Linux x64 Build Debug
+    name: Linux x64 (build)
     runs-on: 'ubuntu-latest'
-    needs: prerequisites_shared
+    needs: prerequisites
     env:
       BOOT_JDK_FILENAME: 'openjdk-14.0.2_linux-x64_bin.tar.gz'
       BOOT_JDK_URL: 'https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_linux-x64_bin.tar.gz'
@@ -126,18 +126,11 @@ jobs:
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-tests-debug.tar.gz
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-debug-symbols.tar.gz
 
-    - name: Persist build log
-      uses: actions/upload-artifact@v2
-      if: ${{ always() }}
-      with:
-        name: linux_x86_64_debug_build_log
-        path: jdk/build/linux-x64-debug/build.log
-
-  linux_x64_test_debug:
+  linux_x64_test:
     if: true
-    name: Linux x64 Test Debug
+    name: Linux x64
     runs-on: 'ubuntu-latest'
-    needs: linux_x64_build_debug
+    needs: linux_x64_build
 
     strategy:
       fail-fast: false
@@ -147,7 +140,6 @@ jobs:
           - test/jdk/:tier1_part2
           - test/jdk/:tier1_part3
           - test/langtools/:tier1
-          - test/lib-test/:tier1
           - test/hotspot/jtreg/:tier1_common
           - test/hotspot/jtreg/:tier1_compiler
           - test/hotspot/jtreg/:tier1_gc
@@ -208,7 +200,7 @@ jobs:
       uses: actions/upload-artifact@v2
       if: ${{ always() }}
       with:
-        name: linux_x64_debug_test_logs
+        name: linux_x64_debug_test_logs_${{ matrix.test }}
         path: |
           build/*/test-results/
           build/*/test-resupport/
