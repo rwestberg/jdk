@@ -56,12 +56,13 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         flavor: [debug]
-      include:
-      - os: ubuntu-latest
-        platform: linux
-        boot_jdk_filename: 'openjdk-14.0.2_linux-x64_bin.tar.gz'
-        boot_jdk_url: 'https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_linux-x64_bin.tar.gz'
-        boot_jdk_sha256: '91310200f072045dc6cef2c8c23e7e6387b37c46e9de49623ce0fa461a24623d'
+
+        include:
+        - os: ubuntu-latest
+          platform: linux
+          boot_jdk_filename: 'openjdk-14.0.2_linux-x64_bin.tar.gz'
+          boot_jdk_url: 'https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_linux-x64_bin.tar.gz'
+          boot_jdk_sha256: '91310200f072045dc6cef2c8c23e7e6387b37c46e9de49623ce0fa461a24623d'
 
     runs-on: ${{ matrix.os }}
     needs: prerequisites_shared
@@ -154,9 +155,10 @@ jobs:
           - test/hotspot/jtreg/:tier1_compiler_1
           - test/hotspot/jtreg/:tier1_compiler_2
           - test/hotspot/jtreg/:tier1_compiler_3
-      include:
-      - os: ubuntu-latest
-        platform: linux
+
+        include:
+        - os: ubuntu-latest
+          platform: linux
 
     runs-on: ${{ matrix.os }}
     needs: ${{ matrix.platform }}_x64_build_${{ matrix.flavor }}
