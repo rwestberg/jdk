@@ -114,8 +114,7 @@ jobs:
         --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION} 
         --with-jtreg=${HOME}/jtreg 
         --with-gtest=${GITHUB_WORKSPACE}/gtest
-        --with-default-make-target="product-bundles test-bundles static-libs-bundles docs-bundles"
-        --enable-full-docs 
+        --with-default-make-target="product-bundles test-bundles static-libs-bundles"
         --with-zlib=system 
         --enable-jtreg-failure-handler 
         --with-exclude-translations=de,es,fr,it,ko,pt_BR,sv,ca,tr,cs,sk,ja_JP_A,ja_JP_HA,ja_JP_HI,ja_JP_I,zh_TW,zh_HK 
