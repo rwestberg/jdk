@@ -71,20 +71,12 @@ jobs:
         path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
         key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
 
-    - name: Create boot JDK destination folder
-      run: mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
-      if: steps.bootjdk.outputs.cache-hit != 'true'
-
     - name: Download boot JDK
-      run: wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
-      if: steps.bootjdk.outputs.cache-hit != 'true'
-
-    - name: Verify boot JDK
-      run: echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
-      if: steps.bootjdk.outputs.cache-hit != 'true'
-
-    - name: Unpack boot JDK
-      run: tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
+      run: |
+        mkdir -p "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
+        wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
+        echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
+        tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
     - name: Restore jtreg artifact
@@ -125,18 +117,21 @@ jobs:
       run: make CONF_NAME=linux-x64-debug
       working-directory: jdk
 
-    - name: Store bundles for later steps
+    - name: Persist test bundles
       uses: actions/upload-artifact@v2
       with:
         name: jdk-linux-x64-debug
-        path: jdk/build/*/bundles/
+        path: |
+          jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-debug.tar.gz
+          jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-tests-debug.tar.gz
+          jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-debug-symbols.tar.gz
 
-    - name: Persist build logs
+    - name: Persist build log
       uses: actions/upload-artifact@v2
       if: ${{ always() }}
       with:
-        name: linux_x86_64_build_logs
-        path: jdk/build/*/build.log
+        name: linux_x86_64_debug_build_log
+        path: jdk/build/linux-x64-debug/build.log
 
   linux_x64_test_debug:
     if: true
@@ -147,8 +142,6 @@ jobs:
     steps:
     - name: Checkout the source
       uses: actions/checkout@v2
-      with:
-        path: jdk
 
     - name: Restore boot JDK from cache
       id: bootjdk
@@ -169,40 +162,42 @@ jobs:
         name: jdk-linux-x64-debug
         path: ~/jdk-linux-x64-debug
 
+    - name: Show artifacts
+      run: find "${HOME}/jdk-linux-x64-debug" -type f
+
     - name: Unpack jdk
-      run: tar xfz ~/jdk-linux-x64-debug/jdk-16-internal+0_linux-x64_bin-debug.tar.gz
-      working-directory: ~/jdk-linux-x64-debug
+      run: |
+        mkdir -p "${HOME}/jdk-linux-x64-debug/jdk-16-internal+0_linux-x64_bin-debug"
+        tar -xf "${HOME}/jdk-linux-x64-debug/jdk-16-internal+0_linux-x64_bin-debug.tar.gz" -C "${HOME}/jdk-linux-x64-debug/jdk-16-internal+0_linux-x64_bin-debug"
 
     - name: Unpack tests
-      run: tar xfz ~/jdk-linux-x64-debug/jdk-16-internal+0_linux-x64_bin-tests-debug.tar.gz
-      working-directory: ~/jdk-linux-x64-debug
+      run: |
+        mkdir -p "${HOME}/jdk-linux-x64-debug/jdk-16-internal+0_linux-x64_bin-tests-debug"
+        tar -xf "${HOME}/jdk-linux-x64-debug/jdk-16-internal+0_linux-x64_bin-tests-debug.tar.gz" -C "${HOME}/jdk-linux-x64-debug/jdk-16-internal+0_linux-x64_bin-tests-debug"
 
     - name: Run tests
       run: >
-        make
+        make test-prebuilt
         CONF_NAME=run-test-prebuilt 
-        test-prebuilt 
         LOG_CMDLINES=true 
         JTREG_VERBOSE=fail,error,time 
         TEST=open/test/hotspot/jtreg/:tier1_compiler_2 
         TEST_OPTS_JAVA_OPTIONS= 
         JTREG_KEYWORDS="!headful"
       env:
+        JDK_IMAGE_DIR={{ env.HOME }}/jdk-linux-x64-debug/jdk-16-internal+0_linux-x64_bin-debug/jdk-16/fastdebug
+        TEST_IMAGE_DIR={{ env.HOME }}/jdk-linux-x64-debug/jdk-16-internal+0_linux-x64_bin-tests-debug
         BOOT_JDK=${{ env.HOME }}/bootjdk/${{ env.BOOT_JDK_VERSION }}/jdk-${{ env.BOOT_JDK_VERSION }}
         JT_HOME=${{ env.HOME }}/jtreg
-        TEST_IMAGE_DIR={{ env.HOME }}/jdk-linux-x64-debug/
-        JDK_IMAGE_DIR={{ env.HOME }}/jdk-linux-x64-debug/jdk-16/fastdebug
-
-      working-directory: jdk
 
     - name: Persist test logs
       uses: actions/upload-artifact@v2
       if: ${{ always() }}
       with:
-        name: linux_x86_64_test_logs
+        name: linux_x64_debug_test_logs
         path: |
-          jdk/build/*/test-results/
-          jdk/build/*/test-resupport/
+          build/*/test-results/
+          build/*/test-resupport/
 
   windows_x86_64:
     if: false
