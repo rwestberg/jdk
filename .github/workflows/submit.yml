@@ -59,12 +59,6 @@ jobs:
       BOOT_JDK_SHA256: '91310200f072045dc6cef2c8c23e7e6387b37c46e9de49623ce0fa461a24623d'
 
     steps:
-    - name: Test set-env
-      run: echo "::set-env name=suite::`echo test/hotspot/jtreg/:tier1_common | sed -e 's!test/!!' -e 's!/:! - !' -e 's!/!_!g'`"
-
-    - name: Check result
-      run: echo "${{ env.suite }}"
-
     - name: Checkout the source
       uses: actions/checkout@v2
       with:
@@ -202,11 +196,14 @@ jobs:
         TEST_OPTS_JAVA_OPTIONS=
         JTREG_KEYWORDS="!headful"
 
+    - name: Create suitable test log artifact name
+      run: echo "::set-env name=suite::`echo ${{ matrix.test }} | sed -e 's!test/!!' -e 's!/jtreg!!' -e 's!/:! - !' -e 's!/!_!g'`"
+
     - name: Persist test logs
       uses: actions/upload-artifact@v2
       if: ${{ always() }}
       with:
-        name: linux_x64_debug_test_logs_${{ matrix.test }}
+        name: linux_x64_debug_test_logs_${{ env.suite }}
         path: |
           build/*/test-results/
           build/*/test-resupport/
