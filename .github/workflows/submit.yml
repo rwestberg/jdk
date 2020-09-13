@@ -475,3 +475,86 @@ jobs:
           jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-debug.tar.gz
           jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-tests-debug.tar.gz
           jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-debug-symbols.tar.gz
+
+  macos_x64_test:
+    if: true
+    name: macOS x64
+    runs-on: 'macos-latest'
+    needs: macos_x64_build
+
+    strategy:
+      fail-fast: false
+      matrix:
+        test:
+          - test/jdk/:tier1_part1
+          - test/jdk/:tier1_part2
+          - test/jdk/:tier1_part3
+          - test/langtools/:tier1
+          - test/hotspot/jtreg/:tier1_common
+          - test/hotspot/jtreg/:tier1_compiler
+          - test/hotspot/jtreg/:tier1_gc
+          - test/hotspot/jtreg/:tier1_runtime
+          - test/hotspot/jtreg/:tier1_serviceability
+
+    steps:
+    - name: Checkout the source
+      uses: actions/checkout@v2
+
+    - name: Restore boot JDK from cache
+      id: bootjdk
+      uses: actions/cache@v2
+      with:
+        path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
+        key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
+
+    - name: Restore jtreg artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: jtreg_${{ env.JTREG_VERSION }}-v1
+        path: ~/jtreg/
+
+    - name: Restore build artifacts
+      uses: actions/download-artifact@v2
+      with:
+        name: jdk-macos-x64-debug
+        path: ~/jdk-macos-x64-debug
+
+    - name: Show artifacts
+      run: find "${HOME}/jdk-macos-x64-debug" -type f
+
+    - name: Unpack jdk
+      run: |
+        mkdir -p "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-debug"
+        tar -xf "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-debug.tar.gz" -C "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-debug"
+
+    - name: Unpack tests
+      run: |
+        mkdir -p "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-tests-debug"
+        tar -xf "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-tests-debug.tar.gz" -C "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-tests-debug"
+
+    - name: Run tests
+      run: >
+        JDK_IMAGE_DIR=${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-debug/jdk-16/fastdebug
+        TEST_IMAGE_DIR=${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-tests-debug
+        BOOT_JDK=${HOME}/bootjdk/${{ env.BOOT_JDK_VERSION }}/jdk-${{ env.BOOT_JDK_VERSION }}
+        JT_HOME=${HOME}/jtreg
+        make test-prebuilt
+        CONF_NAME=run-test-prebuilt
+        LOG_CMDLINES=true
+        JTREG_VERBOSE=fail,error,time
+        TEST=${{ matrix.test }}
+        TEST_OPTS_JAVA_OPTIONS=
+        JTREG_KEYWORDS="!headful"
+
+    - name: Create suitable test log artifact name
+      run: echo "::set-env name=suite::`echo ${{ matrix.test }} | sed -e 's!test/!!' -e 's!/jtreg!!' -e 's!/:!_!' -e 's!/!_!g'`"
+      if: ${{ always() }}
+
+    - name: Persist test logs
+      uses: actions/upload-artifact@v2
+      if: ${{ always() }}
+      with:
+        name: macos_x64_debug_test_logs_${{ env.suite }}
+        path: |
+          build/*/test-results/
+          build/*/test-resupport/
