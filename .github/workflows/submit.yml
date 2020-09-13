@@ -127,7 +127,7 @@ jobs:
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-debug-symbols.tar.gz
 
   linux_x64_test:
-    if: true
+    if: false
     name: Linux x64
     runs-on: 'ubuntu-latest'
     needs: linux_x64_build
