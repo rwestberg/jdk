@@ -197,7 +197,8 @@ jobs:
         JTREG_KEYWORDS="!headful"
 
     - name: Create suitable test log artifact name
-      run: echo "::set-env name=suite::`echo ${{ matrix.test }} | sed -e 's!test/!!' -e 's!/jtreg!!' -e 's!/:! - !' -e 's!/!_!g'`"
+      run: echo "::set-env name=suite::`echo ${{ matrix.test }} | sed -e 's!test/!!' -e 's!/jtreg!!' -e 's!/:!_!' -e 's!/!_!g'`"
+      if: ${{ always() }}
 
     - name: Persist test logs
       uses: actions/upload-artifact@v2
@@ -208,9 +209,9 @@ jobs:
           build/*/test-results/
           build/*/test-resupport/
 
-  windows_x86_64:
-    if: false
-    name: Windows x86_64
+  windows_x64_build:
+    if: true
+    name: Windows x64 (build)
     runs-on: 'windows-latest'
     needs: prerequisites
     env:
@@ -279,37 +280,39 @@ jobs:
         name: jtreg_${{ env.JTREG_VERSION }}-v1
         path: ~/jtreg/
 
+    - name: Add cygwin to path
+      run: echo "::add-path::$HOME\cygwin\cygwin64\bin"
+
     - name: Configure
-      run: |
-        $env:Path = "$HOME\cygwin\cygwin64\bin;$env:Path"
-        & $HOME\cygwin\cygwin64\bin\bash configure --enable-debug "--with-version-opt=$env:GITHUB_ACTOR-$env:GITHUB_SHA" --with-version-build=0 "--with-boot-jdk=$HOME/bootjdk/$env:BOOT_JDK_VERSION/jdk-$env:BOOT_JDK_VERSION" "--with-jtreg=$HOME/jtreg" "--with-gtest=$env:GITHUB_WORKSPACE/gtest"
+      run: >
+        & $HOME\cygwin\cygwin64\bin\bash configure 
+        --with-conf-name=windows-x64-debug
+        --enable-debug
+        --with-target-bits=64
+        --with-version-opt="$env:GITHUB_ACTOR-$env:GITHUB_SHA" 
+        --with-version-build=0 
+        --with-boot-jdk="$HOME/bootjdk/$env:BOOT_JDK_VERSION/jdk-$env:BOOT_JDK_VERSION" 
+        --with-jtreg="$HOME/jtreg" 
+        --with-gtest="$env:GITHUB_WORKSPACE/gtest"
+        --with-default-make-target="product-bundles test-bundles static-libs-bundles"
+        --with-zlib=system
+        --enable-jtreg-failure-handler
+        --with-exclude-translations=de,es,fr,it,ko,pt_BR,sv,ca,tr,cs,sk,ja_JP_A,ja_JP_HA,ja_JP_HI,ja_JP_I,zh_TW,zh_HK
+        --disable-manpages
       working-directory: jdk
 
-    - name: 'Run manually selected tests (${{ github.event.inputs.tests }})'
-      run: |
-        $env:Path = "$HOME\cygwin\cygwin64\bin;$env:Path"
-        & make test TEST="${TESTS}"
-      working-directory: jdk
-      env:
-        TESTS: ${{ github.event.inputs.tests }}
-      if: github.event.inputs.tests != ''
+    - name: Build
+      run: '& make CONF_NAME=windows-x64-debug'
 
-    - name: 'Run default test selection (tier1)'
-      run: |
-        $env:Path = "$HOME\cygwin\cygwin64\bin;$env:Path"
-        & make test TEST=tier1
-      working-directory: jdk
-      if: github.event.inputs.tests == ''
-
-    - name: Persist build and test logs
+    - name: Persist test bundles
       uses: actions/upload-artifact@v2
       if: ${{ always() }}
       with:
-        name: windows_x86_64_logs
+        name: jdk-windows_x64-debug
         path: |
-          jdk/build/*/build.log
-          jdk/build/*/test-results/
-          jdk/build/*/test-resupport/
+          jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-debug.tar.gz
+          jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-tests-debug.tar.gz
+          jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-debug-symbols.tar.gz
 
   macos_x86_64:
     if: false
