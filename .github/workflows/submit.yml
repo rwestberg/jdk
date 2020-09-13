@@ -302,6 +302,7 @@ jobs:
       run: |
         $env:Path = "$HOME\cygwin\cygwin64\bin;$env:Path"
         '& make CONF_NAME=windows-x64-debug'
+      working-directory: jdk
 
     - name: Persist test bundles
       uses: actions/upload-artifact@v2
