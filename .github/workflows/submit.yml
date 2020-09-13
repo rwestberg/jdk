@@ -467,14 +467,11 @@ jobs:
       run: make CONF_NAME=macos-x64-debug
       working-directory: jdk
 
-    - name: Show bundles
-      run: find "jdk/build/macos-x64-debug/bundles" -type f
-
     - name: Persist test bundles
       uses: actions/upload-artifact@v2
       with:
         name: jdk-macos-x64-debug
         path: |
-          jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_macos-x64_bin-debug.tar.gz
-          jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_macos-x64_bin-tests-debug.tar.gz
-          jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_macos-x64_bin-debug-symbols.tar.gz
+          jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-debug.tar.gz
+          jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-tests-debug.tar.gz
+          jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-debug-symbols.tar.gz
