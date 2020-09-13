@@ -366,7 +366,7 @@ jobs:
         --with-target-bits=64
         --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA}
         --with-version-build=0
-        --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}
+        --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}.jdk/Contents/Home
         --with-jtreg=${HOME}/jtreg
         --with-gtest=${GITHUB_WORKSPACE}/gtest
         --with-default-make-target="product-bundles test-bundles static-libs-bundles"
