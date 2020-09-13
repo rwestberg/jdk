@@ -280,11 +280,9 @@ jobs:
         name: jtreg_${{ env.JTREG_VERSION }}-v1
         path: ~/jtreg/
 
-    - name: Add cygwin to path
-      run: echo "::add-path::$HOME\cygwin\cygwin64\bin"
-
     - name: Configure
       run: >
+        $env:Path = "$HOME\cygwin\cygwin64\bin;$env:Path" ;
         & $HOME\cygwin\cygwin64\bin\bash configure 
         --with-conf-name=windows-x64-debug
         --enable-debug
@@ -302,7 +300,9 @@ jobs:
       working-directory: jdk
 
     - name: Build
-      run: '& make CONF_NAME=windows-x64-debug'
+      run: |
+        $env:Path = "$HOME\cygwin\cygwin64\bin;$env:Path"
+        '& make CONF_NAME=windows-x64-debug'
 
     - name: Persist test bundles
       uses: actions/upload-artifact@v2
