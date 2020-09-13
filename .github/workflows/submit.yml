@@ -59,6 +59,12 @@ jobs:
       BOOT_JDK_SHA256: '91310200f072045dc6cef2c8c23e7e6387b37c46e9de49623ce0fa461a24623d'
 
     steps:
+    - name: Test set-env
+      run: echo "::set-env name=suite::`echo test/hotspot/jtreg/:tier1_common | sed -e 's!test/!!' -e 's!/:! - !' -e 's!/!_!g'`"
+
+    - name: Check result
+      run: echo "${{ env.suite }}"
+
     - name: Checkout the source
       uses: actions/checkout@v2
       with:
