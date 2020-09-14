@@ -140,7 +140,7 @@ jobs:
     if: true
     name: Linux x64
     runs-on: 'ubuntu-latest'
-    needs: linux_x64_build
+    needs: [prerequisites, linux_x64_build]
 
     strategy:
       matrix:
