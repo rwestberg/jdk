@@ -184,9 +184,6 @@ jobs:
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-tests-debug.tar.gz
         key: ${{ steps.bundlecache.outputs.key }}
 
-    - name: Show artifacts
-      run: find "${HOME}/jdk-linux-x64-debug" -type f
-
     - name: Unpack jdk
       run: |
         mkdir -p "${HOME}/jdk-linux-x64-debug/jdk-16-internal+0_linux-x64_bin-debug"
@@ -225,7 +222,7 @@ jobs:
           build/*/test-resupport/
 
   windows_x64_build:
-    if: false
+    if: true
     name: Windows x64 (build)
     runs-on: 'windows-latest'
     needs: prerequisites
@@ -235,6 +232,20 @@ jobs:
       BOOT_JDK_SHA256: '20600c0bda9d1db9d20dbe1ab656a5f9175ffb990ef3df6af5d994673e4d8ff9'
 
     steps:
+    - name: Generate test bundle cache key
+      id: bundlecache
+      run: echo "::set-output name=key::jdk-test-bundles-${{ runner.os }}-${GITHUB_SHA}"
+
+    - name: Check if test bundles are present in the cache
+      id: bundle
+      uses: actions/cache@v2
+      with:
+        path: |
+          jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-debug.zip
+          jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-tests-debug.tar.gz
+          jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-debug-symbols.tar.gz
+        key: ${{ steps.bundlecache.outputs.key }}
+
     - name: Restore cygwin packages from cache
       id: cygwin
       uses: actions/cache@v2
@@ -306,17 +317,8 @@ jobs:
         & make CONF_NAME=windows-x64-debug
       working-directory: jdk
 
-    - name: Persist test bundles
-      uses: actions/upload-artifact@v2
-      with:
-        name: jdk-windows-x64-debug
-        path: |
-          jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-debug.zip
-          jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-tests-debug.tar.gz
-          jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-debug-symbols.tar.gz
-
   windows_x64_test:
-    if: false
+    if: true
     name: Windows x64
     runs-on: 'windows-latest'
     needs: windows_x64_build
@@ -358,37 +360,39 @@ jobs:
         & curl -L "https://www.cygwin.com/setup-x86_64.exe" -o "$HOME/cygwin/setup-x86_64.exe"
         Start-Process -FilePath "$HOME\cygwin\setup-x86_64.exe" -ArgumentList "--quiet-mode --packages autoconf,make,zip,unzip --root $HOME\cygwin\cygwin64 --local-package-dir $HOME\cygwin\packages --site http://mirrors.kernel.org/sourceware/cygwin --no-desktop --no-shortcuts --no-startmenu --no-admin" -Wait -NoNewWindow
 
-    - name: Test cygwin
-      run: |
-        $env:Path = "$HOME\cygwin\cygwin64\bin;$env:Path"
-        & cygpath "c:\Windows"
-
     - name: Restore jtreg artifact
       uses: actions/download-artifact@v2
       with:
         name: jtreg_${{ env.JTREG_VERSION }}-v1
         path: ~/jtreg/
 
-    - name: Restore build artifacts
-      uses: actions/download-artifact@v2
+    - name: Generate test bundle cache key
+      id: bundlecache
+      run: echo "::set-output name=key::jdk-test-bundles-${{ runner.os }}-${GITHUB_SHA}"
+
+    - name: Restore test bundles
+      uses: actions/cache@v2
       with:
-        name: jdk-windows-x64-debug
-        path: ~/jdk-windows-x64-debug
+        path: |
+          jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-debug.zip
+          jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-tests-debug.tar.gz
+          jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-debug-symbols.tar.gz
+        key: ${{ steps.bundlecache.outputs.key }}
 
     - name: Unpack jdk
       run: |
         mkdir -p "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug"
-        tar -xf "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug.zip" -C "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug"
+        tar -xf "jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-debug.zip" -C "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug"
 
     - name: Unpack symbols
       run: |
         mkdir -p "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug-symbols"
-        tar -xf "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug-symbols.tar.gz" -C "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug-symbols"
+        tar -xf "jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-debug-symbols.tar.gz" -C "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug-symbols"
 
     - name: Unpack tests
       run: |
         mkdir -p "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-tests-debug"
-        tar -xf "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-tests-debug.tar.gz" -C "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-tests-debug"
+        tar -xf "jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-tests-debug.tar.gz" -C "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-tests-debug"
 
     - name: Run tests
       run: >
@@ -420,7 +424,7 @@ jobs:
           build/*/test-resupport/
 
   macos_x64_build:
-    if: false
+    if: true
     name: macOS x64 (build)
     runs-on: 'macos-latest'
     needs: prerequisites
@@ -430,6 +434,19 @@ jobs:
       BOOT_JDK_SHA256: '386a96eeef63bf94b450809d69ceaa1c9e32a97230e0a120c1b41786b743ae84'
 
     steps:
+    - name: Generate test bundle cache key
+      id: bundlecache
+      run: echo "::set-output name=key::jdk-test-bundles-${{ runner.os }}-${GITHUB_SHA}"
+
+    - name: Check if test bundles are present in the cache
+      id: bundle
+      uses: actions/cache@v2
+      with:
+        path: |
+          jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-debug.tar.gz
+          jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-tests-debug.tar.gz
+        key: ${{ steps.bundlecache.outputs.key }}
+
     - name: Checkout the source
       uses: actions/checkout@v2
       with:
@@ -488,16 +505,8 @@ jobs:
       run: make CONF_NAME=macos-x64-debug
       working-directory: jdk
 
-    - name: Persist test bundles
-      uses: actions/upload-artifact@v2
-      with:
-        name: jdk-macos-x64-debug
-        path: |
-          jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-debug.tar.gz
-          jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-tests-debug.tar.gz
-
   macos_x64_test:
-    if: false
+    if: true
     name: macOS x64
     runs-on: 'macos-latest'
     needs: macos_x64_build
@@ -532,24 +541,27 @@ jobs:
         name: jtreg_${{ env.JTREG_VERSION }}-v1
         path: ~/jtreg/
 
-    - name: Restore build artifacts
-      uses: actions/download-artifact@v2
-      with:
-        name: jdk-macos-x64-debug
-        path: ~/jdk-macos-x64-debug
+    - name: Generate test bundle cache key
+      id: bundlecache
+      run: echo "::set-output name=key::jdk-test-bundles-${{ runner.os }}-${GITHUB_SHA}"
 
-    - name: Show artifacts
-      run: find "${HOME}/jdk-macos-x64-debug" -type f
+    - name: Restore test bundles
+      uses: actions/cache@v2
+      with:
+        path: |
+          jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-debug.tar.gz
+          jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-tests-debug.tar.gz
+        key: ${{ steps.bundlecache.outputs.key }}
 
     - name: Unpack jdk
       run: |
         mkdir -p "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-debug"
-        tar -xf "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-debug.tar.gz" -C "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-debug"
+        tar -xf "jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-debug.tar.gz" -C "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-debug"
 
     - name: Unpack tests
       run: |
         mkdir -p "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-tests-debug"
-        tar -xf "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-tests-debug.tar.gz" -C "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-tests-debug"
+        tar -xf "jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-tests-debug.tar.gz" -C "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-tests-debug"
 
     - name: Install dependencies
       run: brew install make
