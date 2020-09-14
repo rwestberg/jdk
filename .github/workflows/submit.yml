@@ -61,7 +61,7 @@ jobs:
     steps:
     - name: Generate test bundle cache key
       id: bundlecache
-      run: echo "::set-output key=jdk-test-bundles-${{ runner.os }}-${GITHUB_SHA}"
+      run: echo "::set-output name=key::jdk-test-bundles-${{ runner.os }}-${GITHUB_SHA}"
 
     - name: Check if test bundles are present in the cache
       id: bundle
