@@ -48,6 +48,9 @@ jobs:
         name: jtreg_${{ env.JTREG_VERSION }}-v1
         path: ~/jtreg/
 
+    - name: Generate test bundle cache key
+      run: echo "::set-output bundlekey=${GITHUB_SHA}"
+
   linux_x64_build:
     if: true
     name: Linux x64 (build)
@@ -66,7 +69,7 @@ jobs:
         path: |
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-debug.tar.gz
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-tests-debug.tar.gz
-        key: jdk-test-bundles-${{ runner.os }}-${{ env.GITHUB_SHA }}
+        key: jdk-test-bundles-${{ runner.os }}-${{ steps.prerequisites.outputs.bundlekey }}
 
     - name: Checkout the source
       uses: actions/checkout@v2
@@ -174,13 +177,7 @@ jobs:
         path: |
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-debug.tar.gz
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-tests-debug.tar.gz
-        key: jdk-test-bundles-${{ runner.os }}-${{ env.GITHUB_SHA }}
-
-    - name: Restore build artifacts
-      uses: actions/download-artifact@v2
-      with:
-        name: jdk-linux-x64-debug
-        path: ~/jdk-linux-x64-debug
+        key: jdk-test-bundles-${{ runner.os }}-${{ steps.prerequisites.outputs.bundlekey }}
 
     - name: Show artifacts
       run: find "${HOME}/jdk-linux-x64-debug" -type f
