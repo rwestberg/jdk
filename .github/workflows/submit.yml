@@ -133,7 +133,6 @@ jobs:
     needs: linux_x64_build
 
     strategy:
-      fail-fast: false
       matrix:
         test:
           - test/jdk/:tier1_part1
@@ -198,11 +197,11 @@ jobs:
 
     - name: Create suitable test log artifact name
       run: echo "::set-env name=suite::`echo ${{ matrix.test }} | sed -e 's!test/!!' -e 's!/jtreg!!' -e 's!/:!_!' -e 's!/!_!g'`"
-      if: ${{ always() }}
+      if: ${{ failure() }}
 
     - name: Persist test logs
       uses: actions/upload-artifact@v2
-      if: ${{ always() }}
+      if: ${{ failure() }}
       with:
         name: linux_x64_debug_test_logs_${{ env.suite }}
         path: |
@@ -306,7 +305,6 @@ jobs:
 
     - name: Persist test bundles
       uses: actions/upload-artifact@v2
-      if: ${{ always() }}
       with:
         name: jdk-windows-x64-debug
         path: |
@@ -321,7 +319,6 @@ jobs:
     needs: windows_x64_build
 
     strategy:
-      fail-fast: false
       matrix:
         test:
           - test/jdk/:tier1_part1
@@ -403,11 +400,11 @@ jobs:
 
     - name: Create suitable test log artifact name
       run: echo ("::set-env name=suite::${{ matrix.test }}" -replace "test/", "" -replace "/jtreg", "" -replace "/:", "_" -replace "/", "_")
-      if: ${{ always() }}
+      if: ${{ failure() }}
 
     - name: Persist test logs
       uses: actions/upload-artifact@v2
-      if: ${{ always() }}
+      if: ${{ failure() }}
       with:
         name: windows_x64_debug_test_logs_${{ env.suite }}
         path: |
@@ -499,7 +496,6 @@ jobs:
     needs: macos_x64_build
 
     strategy:
-      fail-fast: false
       matrix:
         test:
           - test/jdk/:tier1_part1
@@ -567,11 +563,11 @@ jobs:
 
     - name: Create suitable test log artifact name
       run: echo "::set-env name=suite::`echo ${{ matrix.test }} | sed -e 's!test/!!' -e 's!/jtreg!!' -e 's!/:!_!' -e 's!/!_!g'`"
-      if: ${{ always() }}
+      if: ${{ failure() }}
 
     - name: Persist test logs
       uses: actions/upload-artifact@v2
-      if: ${{ always() }}
+      if: ${{ failure() }}
       with:
         name: macos_x64_debug_test_logs_${{ env.suite }}
         path: |
