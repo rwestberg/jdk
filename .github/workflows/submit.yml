@@ -549,19 +549,19 @@ jobs:
       uses: actions/cache@v2
       with:
         path: |
-          jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-debug.tar.gz
-          jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-tests-debug.tar.gz
+          jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-debug.tar.gz
+          jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-tests-debug.tar.gz
         key: ${{ steps.bundlecache.outputs.key }}
 
     - name: Unpack jdk
       run: |
         mkdir -p "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-debug"
-        tar -xf "jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-debug.tar.gz" -C "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-debug"
+        tar -xf "jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-debug.tar.gz" -C "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-debug"
 
     - name: Unpack tests
       run: |
         mkdir -p "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-tests-debug"
-        tar -xf "jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-tests-debug.tar.gz" -C "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-tests-debug"
+        tar -xf "jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-tests-debug.tar.gz" -C "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-tests-debug"
 
     - name: Install dependencies
       run: brew install make
