@@ -106,7 +106,7 @@ jobs:
         --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}
         --with-jtreg=${HOME}/jtreg
         --with-gtest=${GITHUB_WORKSPACE}/gtest
-        --with-default-make-target="product-bundles test-bundles static-libs-bundles"
+        --with-default-make-target="product-bundles test-bundles"
         --with-zlib=system
         --enable-jtreg-failure-handler
         --with-exclude-translations=de,es,fr,it,ko,pt_BR,sv,ca,tr,cs,sk,ja_JP_A,ja_JP_HA,ja_JP_HI,ja_JP_I,zh_TW,zh_HK
@@ -124,7 +124,6 @@ jobs:
         path: |
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-debug.tar.gz
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-tests-debug.tar.gz
-          jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-debug-symbols.tar.gz
 
   linux_x64_test:
     if: true
@@ -291,7 +290,7 @@ jobs:
         --with-boot-jdk="$HOME/bootjdk/$env:BOOT_JDK_VERSION/jdk-$env:BOOT_JDK_VERSION" 
         --with-jtreg="$HOME/jtreg" 
         --with-gtest="$env:GITHUB_WORKSPACE/gtest"
-        --with-default-make-target="product-bundles test-bundles static-libs-bundles"
+        --with-default-make-target="product-bundles test-bundles"
         --enable-jtreg-failure-handler
         --with-exclude-translations=de,es,fr,it,ko,pt_BR,sv,ca,tr,cs,sk,ja_JP_A,ja_JP_HA,ja_JP_HI,ja_JP_I,zh_TW,zh_HK
         --disable-manpages
@@ -475,7 +474,7 @@ jobs:
         --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}.jdk/Contents/Home
         --with-jtreg=${HOME}/jtreg
         --with-gtest=${GITHUB_WORKSPACE}/gtest
-        --with-default-make-target="product-bundles test-bundles static-libs-bundles"
+        --with-default-make-target="product-bundles test-bundles"
         --with-zlib=system
         --enable-jtreg-failure-handler
         --with-exclude-translations=de,es,fr,it,ko,pt_BR,sv,ca,tr,cs,sk,ja_JP_A,ja_JP_HA,ja_JP_HI,ja_JP_I,zh_TW,zh_HK
@@ -493,7 +492,6 @@ jobs:
         path: |
           jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-debug.tar.gz
           jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-tests-debug.tar.gz
-          jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-debug-symbols.tar.gz
 
   macos_x64_test:
     if: true
