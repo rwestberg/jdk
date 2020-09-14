@@ -48,9 +48,6 @@ jobs:
         name: jtreg_${{ env.JTREG_VERSION }}-v1
         path: ~/jtreg/
 
-    - name: Generate test bundle cache key
-      run: echo "::set-output bundlekey=${GITHUB_SHA}"
-
   linux_x64_build:
     if: true
     name: Linux x64 (build)
@@ -62,6 +59,10 @@ jobs:
       BOOT_JDK_SHA256: '91310200f072045dc6cef2c8c23e7e6387b37c46e9de49623ce0fa461a24623d'
 
     steps:
+    - name: Generate test bundle cache key
+      id: bundlecache
+      run: echo "::set-output key=jdk-test-bundles-${{ runner.os }}-${GITHUB_SHA}"
+
     - name: Check if test bundles are present in the cache
       id: bundle
       uses: actions/cache@v2
@@ -69,7 +70,7 @@ jobs:
         path: |
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-debug.tar.gz
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-tests-debug.tar.gz
-        key: jdk-test-bundles-${{ runner.os }}-${{ steps.prerequisites.outputs.bundlekey }}
+        key: ${{ steps.bundlecache.outputs.key }}
 
     - name: Checkout the source
       uses: actions/checkout@v2
@@ -140,7 +141,7 @@ jobs:
     if: true
     name: Linux x64
     runs-on: 'ubuntu-latest'
-    needs: [prerequisites, linux_x64_build]
+    needs: linux_x64_build
 
     strategy:
       matrix:
@@ -171,13 +172,17 @@ jobs:
         name: jtreg_${{ env.JTREG_VERSION }}-v1
         path: ~/jtreg/
 
+    - name: Generate test bundle cache key
+      id: bundlecache
+      run: echo "::set-output key=jdk-test-bundles-${{ runner.os }}-${GITHUB_SHA}"
+
     - name: Restore test bundles
       uses: actions/cache@v2
       with:
         path: |
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-debug.tar.gz
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-tests-debug.tar.gz
-        key: jdk-test-bundles-${{ runner.os }}-${{ steps.prerequisites.outputs.bundlekey }}
+        key: ${{ steps.bundlecache.outputs.key }}
 
     - name: Show artifacts
       run: find "${HOME}/jdk-linux-x64-debug" -type f
