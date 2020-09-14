@@ -174,7 +174,7 @@ jobs:
 
     - name: Generate test bundle cache key
       id: bundlecache
-      run: echo "::set-output key=jdk-test-bundles-${{ runner.os }}-${GITHUB_SHA}"
+      run: echo "::set-output name=key::jdk-test-bundles-${{ runner.os }}-${GITHUB_SHA}"
 
     - name: Restore test bundles
       uses: actions/cache@v2
