@@ -459,6 +459,9 @@ jobs:
         ref: ${{ env.GTEST_VERSION }}
         path: gtest
 
+    - name: Install dependencies
+      run: brew install make
+
     - name: Configure
       run: >
         bash configure
@@ -546,11 +549,8 @@ jobs:
         mkdir -p "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-tests-debug"
         tar -xf "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-tests-debug.tar.gz" -C "${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-tests-debug"
 
-    - name: Show unpacked artifacts
-      run: find "${HOME}/jdk-macos-x64-debug" -type f
-
-    - name: Show pwd
-      run: find "." -type f
+    - name: Install dependencies
+      run: brew install make
 
     - name: Run tests
       run: >
@@ -558,7 +558,7 @@ jobs:
         TEST_IMAGE_DIR=${HOME}/jdk-macos-x64-debug/jdk-16-internal+0_osx-x64_bin-tests-debug
         BOOT_JDK=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}.jdk/Contents/Home
         JT_HOME=${HOME}/jtreg
-        make test-prebuilt
+        gmake test-prebuilt
         CONF_NAME=run-test-prebuilt
         LOG_CMDLINES=true
         JTREG_VERBOSE=fail,error,time
