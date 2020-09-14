@@ -393,8 +393,7 @@ jobs:
         $env:TEST_IMAGE_DIR = "$HOME/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-tests-debug" ;
         $env:BOOT_JDK = "$HOME/bootjdk/$env:BOOT_JDK_VERSION/jdk-$env:BOOT_JDK_VERSION" ;
         $env:JT_HOME = "$HOME/jtreg" ;
-        & $HOME\cygwin\cygwin64\bin\bash -c
-        make test-prebuilt
+        & make test-prebuilt
         CONF_NAME=run-test-prebuilt
         LOG_CMDLINES=true
         JTREG_VERBOSE=fail,error,time
@@ -403,7 +402,7 @@ jobs:
         JTREG_KEYWORDS="!headful"
 
     - name: Create suitable test log artifact name
-      run: echo "::set-env name=suite::`echo ${{ matrix.test }} | sed -e 's!test/!!' -e 's!/jtreg!!' -e 's!/:!_!' -e 's!/!_!g'`"
+      run: echo ("::set-env name=suite::${{ matrix.test }}" -replace "test/", "" -replace "/jtreg", "" -replace "/:", "_" -replace "/", "_")
       if: ${{ always() }}
 
     - name: Persist test logs
