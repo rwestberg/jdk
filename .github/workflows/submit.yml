@@ -223,7 +223,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/cygwin/cygwin64
-        key: cygwin-${{ runner.os }}-v2
+        key: cygwin-${{ runner.os }}-v4
 
     - name: Install cygwin
       run: |
@@ -343,7 +343,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/cygwin/cygwin64
-        key: cygwin-${{ runner.os }}-v2
+        key: cygwin-${{ runner.os }}-v3
 
     - name: Test cygwin
       run: |
