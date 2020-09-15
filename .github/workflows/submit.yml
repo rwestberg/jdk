@@ -328,7 +328,6 @@ jobs:
         key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
 
     - name: Download boot JDK
-      id: bootjdk
       run: |
         mkdir -p "$HOME\bootjdk\$env:BOOT_JDK_VERSION"
         & curl -L "$env:BOOT_JDK_URL" -o "$HOME/bootjdk/$env:BOOT_JDK_FILENAME"
@@ -484,7 +483,6 @@ jobs:
           jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-tests-debug.tar.gz
 
   macos_x64_test:
-    if: true
     name: macOS x64
     runs-on: 'macos-latest'
     needs: macos_x64_build
