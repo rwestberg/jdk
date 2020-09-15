@@ -309,7 +309,7 @@ jobs:
           - test/jdk/:tier1_part1
           - test/jdk/:tier1_part2
           - test/jdk/:tier1_part3
-          # - test/langtools/:tier1
+         - test/langtools/:tier1
           - test/hotspot/jtreg/:tier1_common
           - test/hotspot/jtreg/:tier1_compiler
           - test/hotspot/jtreg/:tier1_gc
@@ -379,6 +379,7 @@ jobs:
     - name: Run tests
       run: >
         $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
+        $env:Path = $env:Path -split ";" -notmatch "java" -join ";"
         $env:JDK_IMAGE_DIR = cygpath "$HOME/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug/jdk-16/fastdebug" ;
         $env:SYMBOLS_IMAGE_DIR = cygpath "$HOME/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug/jdk-16/fastdebug" ;
         $env:TEST_IMAGE_DIR = cygpath "$HOME/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-tests-debug" ;
