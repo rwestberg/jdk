@@ -257,7 +257,7 @@ jobs:
       run: |
         New-Item -Force -ItemType directory -Path "$HOME\cygwin"
         & curl -L "https://www.cygwin.com/setup-x86_64.exe" -o "$HOME/cygwin/setup-x86_64.exe"
-        Start-Process -FilePath "$HOME\cygwin\setup-x86_64.exe" -ArgumentList "--quiet-mode --packages autoconf,make,zip,unzip --root C:\cygwin64 --local-package-dir $HOME\cygwin\packages --site http://mirrors.kernel.org/sourceware/cygwin --no-desktop --no-shortcuts --no-startmenu --no-admin" -Wait -NoNewWindow
+        Start-Process -FilePath "$HOME\cygwin\setup-x86_64.exe" -ArgumentList "--quiet-mode --packages autoconf,make,zip,unzip --root $HOME\cygwin\cygwin64 --local-package-dir $HOME\cygwin\packages --site http://mirrors.kernel.org/sourceware/cygwin --no-desktop --no-shortcuts --no-startmenu --no-admin" -Wait -NoNewWindow
 
     - name: Checkout the source
       uses: actions/checkout@v2
@@ -295,8 +295,8 @@ jobs:
 
     - name: Configure
       run: >
-        $env:Path = "C:\cygwin64\bin;$env:Path" ;
-        & C:\cygwin64\bin\bash configure 
+        $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
+        & bash configure 
         --with-conf-name=windows-x64-debug
         --enable-debug
         --with-target-bits=64
@@ -313,7 +313,7 @@ jobs:
 
     - name: Build
       run: |
-        $env:Path = "C:\cygwin64\bin;$env:Path"
+        $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
         & make CONF_NAME=windows-x64-debug
       working-directory: jdk
 
@@ -358,7 +358,7 @@ jobs:
       run: |
         New-Item -Force -ItemType directory -Path "$HOME\cygwin"
         & curl -L "https://www.cygwin.com/setup-x86_64.exe" -o "$HOME/cygwin/setup-x86_64.exe"
-        Start-Process -FilePath "$HOME\cygwin\setup-x86_64.exe" -ArgumentList "--quiet-mode --packages autoconf,make,zip,unzip --root C:\cygwin64 --local-package-dir $HOME\cygwin\packages --site http://mirrors.kernel.org/sourceware/cygwin --no-desktop --no-shortcuts --no-startmenu --no-admin" -Wait -NoNewWindow
+        Start-Process -FilePath "$HOME\cygwin\setup-x86_64.exe" -ArgumentList "--quiet-mode --packages autoconf,make,zip,unzip --root $HOME\cygwin\cygwin64 --local-package-dir $HOME\cygwin\packages --site http://mirrors.kernel.org/sourceware/cygwin --no-desktop --no-shortcuts --no-startmenu --no-admin" -Wait -NoNewWindow
 
     - name: Restore jtreg artifact
       uses: actions/download-artifact@v2
@@ -396,7 +396,7 @@ jobs:
 
     - name: Run tests
       run: >
-        $env:Path = "C:\cygwin64\bin;$env:Path" ;
+        $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
         $env:JDK_IMAGE_DIR = cygpath "$HOME/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug/jdk-16/fastdebug" ;
         $env:SYMBOLS_IMAGE_DIR = cygpath "$HOME/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug/jdk-16/fastdebug" ;
         $env:TEST_IMAGE_DIR = cygpath "$HOME/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-tests-debug" ;
