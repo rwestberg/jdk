@@ -309,7 +309,7 @@ jobs:
           - test/jdk/:tier1_part1
           - test/jdk/:tier1_part2
           - test/jdk/:tier1_part3
-          - test/langtools/:tier1
+          # - test/langtools/:tier1
           - test/hotspot/jtreg/:tier1_common
           - test/hotspot/jtreg/:tier1_compiler
           - test/hotspot/jtreg/:tier1_gc
