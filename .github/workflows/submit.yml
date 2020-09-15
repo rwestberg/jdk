@@ -365,7 +365,6 @@ jobs:
         key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
 
     - name: Download boot JDK
-      id: bootjdk
       run: |
         mkdir -p "$HOME\bootjdk\$env:BOOT_JDK_VERSION"
         & curl -L "$env:BOOT_JDK_URL" -o "$HOME/bootjdk/$env:BOOT_JDK_FILENAME"
