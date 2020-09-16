@@ -267,6 +267,7 @@ jobs:
     - name: Configure
       run: >
         $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
+        $env:Path = $env:Path -split ";" -match "C:\\Windows|PowerShell|cygwin" -join ";" ;
         & bash configure 
         --with-conf-name=windows-x64-debug
         --enable-debug
@@ -285,6 +286,7 @@ jobs:
     - name: Build
       run: |
         $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
+        $env:Path = $env:Path -split ";" -match "C:\\Windows|PowerShell|cygwin" -join ";" ;
         & make CONF_NAME=windows-x64-debug
       working-directory: jdk
 
@@ -309,7 +311,7 @@ jobs:
           - test/jdk/:tier1_part1
           - test/jdk/:tier1_part2
           - test/jdk/:tier1_part3
-          - test/langtools/:tier1
+          # - test/langtools/:tier1
           - test/hotspot/jtreg/:tier1_common
           - test/hotspot/jtreg/:tier1_compiler
           - test/hotspot/jtreg/:tier1_gc
