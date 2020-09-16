@@ -36,10 +36,14 @@ jobs:
       run: mv build/images/jtreg ~/
       if: steps.jtreg.outputs.cache-hit != 'true'
 
+    - name: Determine jtreg artifact name
+      run: echo "::set-env name=bundler::${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}"
+      if: ${{ failure() }}
+
     - name: Store jtreg for later steps
       uses: actions/upload-artifact@v2
       with:
-        name: jtreg_${{ env.JTREG_VERSION }}_${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}
+        name: jtreg_${{ env.JTREG_VERSION }}_${{ env.bundler }}
         path: ~/jtreg/
 
   linux_x64_build:
@@ -73,10 +77,14 @@ jobs:
         tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
       if: steps.bootjdk.outputs.cache-hit != 'true'
 
+    - name: Determine jtreg artifact name
+      run: echo "::set-env name=bundler::${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}"
+      if: ${{ failure() }}
+
     - name: Restore jtreg artifact
       uses: actions/download-artifact@v2
       with:
-        name: jtreg_${{ env.JTREG_VERSION }}_${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}
+        name: jtreg_${{ env.JTREG_VERSION }}_${{ env.bundler }}
         path: ~/jtreg/
 
     - name: Checkout gtest sources
