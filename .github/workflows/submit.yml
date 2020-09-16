@@ -15,7 +15,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
     - name: Determine unique bundle identifier
-      run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA}"
+      run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
 
     - name: Check if a jtreg image is present in the cache
       id: jtreg
@@ -57,7 +57,7 @@ jobs:
 
     steps:
     - name: Determine unique bundle identifier
-      run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA}"
+      run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
 
     - name: Checkout the source
       uses: actions/checkout@v2
@@ -146,7 +146,7 @@ jobs:
 
     steps:
     - name: Determine unique bundle identifier
-      run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA}"
+      run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
 
     - name: Checkout the source
       uses: actions/checkout@v2
@@ -227,7 +227,7 @@ jobs:
 
     steps:
     - name: Determine unique bundle identifier
-      run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA}"
+      run: echo ("::set-env name=bundleid::$env:GITHUB_ACTOR_" + (-join "$env:GITHUB_SHA"[0..7]))
 
     - name: Restore cygwin packages from cache
       id: cygwin
@@ -332,7 +332,7 @@ jobs:
 
     steps:
     - name: Determine unique bundle identifier
-      run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA}"
+      run: echo ("::set-env name=bundleid::$env:GITHUB_ACTOR_" + (-join "$env:GITHUB_SHA"[0..7]))
 
     - name: Checkout the source
       uses: actions/checkout@v2
@@ -435,7 +435,7 @@ jobs:
 
     steps:
     - name: Determine unique bundle identifier
-      run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA}"
+      run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
 
     - name: Checkout the source
       uses: actions/checkout@v2
@@ -523,7 +523,7 @@ jobs:
 
     steps:
     - name: Determine unique bundle identifier
-      run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA}"
+      run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
 
     - name: Checkout the source
       uses: actions/checkout@v2
