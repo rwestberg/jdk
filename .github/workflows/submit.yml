@@ -227,7 +227,7 @@ jobs:
 
     steps:
     - name: Determine unique bundle identifier
-      run: echo ("::set-env name=bundleid::$env:GITHUB_ACTOR_" + (-join "$env:GITHUB_SHA"[0..7]))
+      run: echo ("::set-env name=bundleid::$env:GITHUB_ACTOR" + "_" + (-join "$env:GITHUB_SHA"[0..7]))
 
     - name: Restore cygwin packages from cache
       id: cygwin
@@ -332,7 +332,7 @@ jobs:
 
     steps:
     - name: Determine unique bundle identifier
-      run: echo ("::set-env name=bundleid::$env:GITHUB_ACTOR_" + (-join "$env:GITHUB_SHA"[0..7]))
+      run: echo ("::set-env name=bundleid::$env:GITHUB_ACTOR" + "_" + (-join "$env:GITHUB_SHA"[0..7]))
 
     - name: Checkout the source
       uses: actions/checkout@v2
