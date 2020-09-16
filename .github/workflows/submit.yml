@@ -39,7 +39,7 @@ jobs:
     - name: Store jtreg for later steps
       uses: actions/upload-artifact@v2
       with:
-        name: jtreg_${{ env.JTREG_VERSION }}-v1
+        name: jtreg_${{ env.JTREG_VERSION }}_${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}
         path: ~/jtreg/
 
   linux_x64_build:
@@ -76,7 +76,7 @@ jobs:
     - name: Restore jtreg artifact
       uses: actions/download-artifact@v2
       with:
-        name: jtreg_${{ env.JTREG_VERSION }}-v1
+        name: jtreg_${{ env.JTREG_VERSION }}_${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}
         path: ~/jtreg/
 
     - name: Checkout gtest sources
@@ -160,7 +160,7 @@ jobs:
     - name: Restore jtreg artifact
       uses: actions/download-artifact@v2
       with:
-        name: jtreg_${{ env.JTREG_VERSION }}-v1
+        name: jtreg_${{ env.JTREG_VERSION }}_${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}
         path: ~/jtreg/
 
     - name: Restore build artifacts
@@ -261,7 +261,7 @@ jobs:
     - name: Restore jtreg artifact
       uses: actions/download-artifact@v2
       with:
-        name: jtreg_${{ env.JTREG_VERSION }}-v1
+        name: jtreg_${{ env.JTREG_VERSION }}_${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}
         path: ~/jtreg/
 
     - name: Configure
@@ -354,7 +354,7 @@ jobs:
     - name: Restore jtreg artifact
       uses: actions/download-artifact@v2
       with:
-        name: jtreg_${{ env.JTREG_VERSION }}-v1
+        name: jtreg_${{ env.JTREG_VERSION }}_${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}
         path: ~/jtreg/
 
     - name: Restore build artifacts
@@ -442,7 +442,7 @@ jobs:
     - name: Restore jtreg artifact
       uses: actions/download-artifact@v2
       with:
-        name: jtreg_${{ env.JTREG_VERSION }}-v1
+        name: jtreg_${{ env.JTREG_VERSION }}_${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}
         path: ~/jtreg/
 
     - name: Checkout gtest sources
@@ -525,7 +525,7 @@ jobs:
     - name: Restore jtreg artifact
       uses: actions/download-artifact@v2
       with:
-        name: jtreg_${{ env.JTREG_VERSION }}-v1
+        name: jtreg_${{ env.JTREG_VERSION }}_${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}
         path: ~/jtreg/
 
     - name: Restore build artifacts
