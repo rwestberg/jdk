@@ -37,7 +37,7 @@ jobs:
       if: steps.jtreg.outputs.cache-hit != 'true'
 
     - name: Determine jtreg artifact name
-      run: echo "::set-env name=bundler::${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}"
+      run: echo "::set-env name=bundler::${{ env.GITHUB_ACTOR }}_${GITHUB_SHA}"
       if: ${{ failure() }}
 
     - name: Store jtreg for later steps
