@@ -114,7 +114,7 @@ jobs:
     - name: Persist test bundles
       uses: actions/upload-artifact@v2
       with:
-        name: jdk-linux-x64-debug
+        name: jdk-linux-x64-debug_${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}
         path: |
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-debug.tar.gz
           jdk/build/linux-x64-debug/bundles/jdk-16-internal+0_linux-x64_bin-tests-debug.tar.gz
@@ -166,7 +166,7 @@ jobs:
     - name: Restore build artifacts
       uses: actions/download-artifact@v2
       with:
-        name: jdk-linux-x64-debug
+        name: jdk-linux-x64-debug_${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}
         path: ~/jdk-linux-x64-debug
 
     - name: Unpack jdk
@@ -201,7 +201,7 @@ jobs:
       uses: actions/upload-artifact@v2
       if: ${{ failure() }}
       with:
-        name: linux_x64_debug_test_logs_${{ env.suite }}
+        name: linux-x64-debug_testlogs_${{ env.suite }}
         path: |
           build/*/test-results/
           build/*/test-resupport/
@@ -293,7 +293,7 @@ jobs:
     - name: Persist test bundles
       uses: actions/upload-artifact@v2
       with:
-        name: jdk-windows-x64-debug
+        name: jdk-windows-x64-debug_${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}
         path: |
           jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-debug.zip
           jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-tests-debug.tar.gz
@@ -360,7 +360,7 @@ jobs:
     - name: Restore build artifacts
       uses: actions/download-artifact@v2
       with:
-        name: jdk-windows-x64-debug
+        name: jdk-windows-x64-debug_${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}
         path: ~/jdk-windows-x64-debug
 
     - name: Unpack jdk
@@ -403,7 +403,7 @@ jobs:
       uses: actions/upload-artifact@v2
       if: ${{ failure() }}
       with:
-        name: windows_x64_debug_test_logs_${{ env.suite }}
+        name: windows-x64-debug_testlogs_${{ env.suite }}
         path: |
           build/*/test-results/
           build/*/test-resupport/
@@ -480,7 +480,7 @@ jobs:
     - name: Persist test bundles
       uses: actions/upload-artifact@v2
       with:
-        name: jdk-macos-x64-debug
+        name: jdk-macos-x64-debug_${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}
         path: |
           jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-debug.tar.gz
           jdk/build/macos-x64-debug/bundles/jdk-16-internal+0_osx-x64_bin-tests-debug.tar.gz
@@ -531,7 +531,7 @@ jobs:
     - name: Restore build artifacts
       uses: actions/download-artifact@v2
       with:
-        name: jdk-macos-x64-debug
+        name: jdk-macos-x64-debug_${{ env.GITHUB_ACTOR }}_${{ env.GITHUB_SHA }}
         path: ~/jdk-macos-x64-debug
 
     - name: Unpack jdk
@@ -569,7 +569,7 @@ jobs:
       uses: actions/upload-artifact@v2
       if: ${{ failure() }}
       with:
-        name: macos_x64_debug_test_logs_${{ env.suite }}
+        name: macos-x64-debug_testlogs_${{ env.suite }}
         path: |
           build/*/test-results/
           build/*/test-resupport/
