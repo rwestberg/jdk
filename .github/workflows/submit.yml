@@ -38,7 +38,6 @@ jobs:
 
     - name: Determine jtreg artifact name
       run: echo "::set-env name=bundler::${{ env.GITHUB_ACTOR }}_${GITHUB_SHA}"
-      if: ${{ failure() }}
 
     - name: Store jtreg for later steps
       uses: actions/upload-artifact@v2
