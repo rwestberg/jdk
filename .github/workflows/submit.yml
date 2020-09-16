@@ -433,7 +433,7 @@ jobs:
 
     - name: Download boot JDK
       run: |
-        mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
+        mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION} || true
         wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
         echo "${BOOT_JDK_SHA256}  ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | shasum -a 256 -c >/dev/null -
         tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
@@ -516,7 +516,7 @@ jobs:
 
     - name: Download boot JDK
       run: |
-        mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION}
+        mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION} || true
         wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
         echo "${BOOT_JDK_SHA256}  ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | shasum -a 256 -c >/dev/null -
         tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
