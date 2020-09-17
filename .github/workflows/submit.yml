@@ -262,10 +262,24 @@ jobs:
           build/*/test-resupport/
 
   windows_x64_build:
-    if: false
-    name: Windows x64 (build)
+    if: true
+    name: Windows x64
     runs-on: 'windows-latest'
     needs: prerequisites
+
+    strategy:
+      fail-fast: false
+      matrix:
+        flavor:
+          - build release
+          - build debug
+        include:
+        - flavor: build release
+          artifact: 
+        - flavor: build debug
+          flags: --enable-debug
+          artifact: -debug
+
     env:
       BOOT_JDK_FILENAME: 'openjdk-14.0.2_windows-x64_bin.zip'
       BOOT_JDK_URL: 'https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_windows-x64_bin.zip'
@@ -327,9 +341,8 @@ jobs:
         $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
         $env:Path = $env:Path -split ";" -match "C:\\Windows|PowerShell|cygwin" -join ";" ;
         & bash configure 
-        --with-conf-name=windows-x64-debug
-        --enable-debug
-        --with-target-bits=64
+        --with-conf-name=windows-x64
+        ${{ matrix.flags }}
         --with-version-opt="$env:GITHUB_ACTOR-$env:GITHUB_SHA" 
         --with-version-build=0 
         --with-boot-jdk="$HOME/bootjdk/$env:BOOT_JDK_VERSION/jdk-$env:BOOT_JDK_VERSION" 
@@ -337,25 +350,23 @@ jobs:
         --with-gtest="$env:GITHUB_WORKSPACE/gtest"
         --with-default-make-target="product-bundles test-bundles"
         --enable-jtreg-failure-handler
-        --with-exclude-translations=de,es,fr,it,ko,pt_BR,sv,ca,tr,cs,sk,ja_JP_A,ja_JP_HA,ja_JP_HI,ja_JP_I,zh_TW,zh_HK
-        --disable-manpages
       working-directory: jdk
 
     - name: Build
       run: |
         $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
         $env:Path = $env:Path -split ";" -match "C:\\Windows|PowerShell|cygwin" -join ";" ;
-        & make CONF_NAME=windows-x64-debug
+        & make CONF_NAME=windows-x64 ${{ matrix.build-target }}
       working-directory: jdk
 
     - name: Persist test bundles
       uses: actions/upload-artifact@v2
       with:
-        name: jdk-windows-x64-debug_${{ env.bundleid }}
+        name: jdk-windows-x64${{ matrix.artifact }}_${{ env.bundleid }}
         path: |
-          jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-debug.zip
-          jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-tests-debug.tar.gz
-          jdk/build/windows-x64-debug/bundles/jdk-16-internal+0_windows-x64_bin-debug-symbols.tar.gz
+          jdk/build/windows-x64/bundles/jdk-16-internal+0_windows-x64_bin${{ matrix.artifact }}.zip
+          jdk/build/windows-x64/bundles/jdk-16-internal+0_windows-x64_bin-tests${{ matrix.artifact }}.tar.gz
+          jdk/build/windows-x64/bundles/jdk-16-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols.tar.gz
 
   windows_x64_test:
     if: true
@@ -367,15 +378,39 @@ jobs:
       fail-fast: false
       matrix:
         test:
-          - test/jdk/:tier1_part1
-          - test/jdk/:tier1_part2
-          - test/jdk/:tier1_part3
-          # - test/langtools/:tier1
-          - test/hotspot/jtreg/:tier1_common
-          - test/hotspot/jtreg/:tier1_compiler
-          - test/hotspot/jtreg/:tier1_gc
-          - test/hotspot/jtreg/:tier1_runtime
-          - test/hotspot/jtreg/:tier1_serviceability
+          - jdk/tier1 part 1
+          - jdk/tier1 part 2
+          - jdk/tier1 part 3
+          - langtools/tier1
+          - hotspot/tier1 common
+          - hotspot/tier1 compiler
+          - hotspot/tier1 gc
+          - hotspot/tier1 runtime
+          - hotspot/tier1 serviceability
+        include:
+        - test: jdk/tier1 part 1
+          suites: test/jdk/:tier1_part1
+        - test: jdk/tier1 part 2
+          suites: test/jdk/:tier1_part2
+        - test: jdk/tier1 part 3
+          suites: test/jdk/:tier1_part3
+        - test: langtools/tier1
+          suites: test/langtools/:tier1
+        - test: hotspot/tier1 common
+          suites: test/hotspot/jtreg/:tier1_common
+          artifact: -debug
+        - test: hotspot/tier1 compiler
+          suites: test/hotspot/jtreg/:tier1_compiler
+          artifact: -debug
+        - test: hotspot/tier1 gc
+          suites: test/hotspot/jtreg/:tier1_gc
+          artifact: -debug
+        - test: hotspot/tier1 runtime
+          suites: test/hotspot/jtreg/:tier1_runtime
+          artifact: -debug
+        - test: hotspot/tier1 serviceability
+          suites: test/hotspot/jtreg/:tier1_serviceability
+          artifact: -debug
 
     steps:
     - name: Determine unique bundle identifier
@@ -422,50 +457,56 @@ jobs:
     - name: Restore build artifacts
       uses: actions/download-artifact@v2
       with:
-        name: jdk-windows-x64-debug_${{ env.bundleid }}
-        path: ~/jdk-windows-x64-debug
+        name: jdk-windows-x64${{ matrix.artifact }}_${{ env.bundleid }}
+        path: ~/jdk-windows-x64${{ matrix.artifact }}
 
     - name: Unpack jdk
       run: |
-        mkdir -p "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug"
-        tar -xf "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug.zip" -C "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug"
+        mkdir -p "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-16-internal+0_windows-x64_bin${{ matrix.artifact }}"
+        tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-16-internal+0_windows-x64_bin${{ matrix.artifact }}.zip" -C "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-16-internal+0_windows-x64_bin${{ matrix.artifact }}"
 
     - name: Unpack symbols
       run: |
-        mkdir -p "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug-symbols"
-        tar -xf "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug-symbols.tar.gz" -C "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug-symbols"
+        mkdir -p "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-16-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols"
+        tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-16-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols.tar.gz" -C "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-16-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols"
 
     - name: Unpack tests
       run: |
-        mkdir -p "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-tests-debug"
-        tar -xf "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-tests-debug.tar.gz" -C "${HOME}/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-tests-debug"
+        mkdir -p "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-16-internal+0_windows-x64_bin-tests${{ matrix.artifact }}"
+        tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-16-internal+0_windows-x64_bin-tests${{ matrix.artifact }}.tar.gz" -C "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-16-internal+0_windows-x64_bin-tests${{ matrix.artifact }}"
+
+    - name: Find root of jdk image dir
+      run: |
+        $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path"
+        imageroot=`find ${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-16-internal+0_windows-x64_bin${{ matrix.artifact }} -name release -type f`
+        & echo "::set-env name=imageroot::`dirname ${imageroot}`"
 
     - name: Run tests
       run: >
         $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
         $env:Path = $env:Path -split ";" -match "C:\\Windows|PowerShell|cygwin" -join ";" ;
-        $env:JDK_IMAGE_DIR = cygpath "$HOME/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug/jdk-16/fastdebug" ;
-        $env:SYMBOLS_IMAGE_DIR = cygpath "$HOME/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-debug/jdk-16/fastdebug" ;
-        $env:TEST_IMAGE_DIR = cygpath "$HOME/jdk-windows-x64-debug/jdk-16-internal+0_windows-x64_bin-tests-debug" ;
+        $env:JDK_IMAGE_DIR = ${{ env.imageroot }} ;
+        $env:SYMBOLS_IMAGE_DIR = ${{ env.imageroot }} ;
+        $env:TEST_IMAGE_DIR = cygpath "$HOME/jdk-windows-x64${{ matrix.artifact }}/jdk-16-internal+0_windows-x64_bin-tests${{ matrix.artifact }}" ;
         $env:BOOT_JDK = cygpath "$HOME/bootjdk/$env:BOOT_JDK_VERSION/jdk-$env:BOOT_JDK_VERSION" ;
         $env:JT_HOME = cygpath "$HOME/jtreg" ;
         & make test-prebuilt
         CONF_NAME=run-test-prebuilt
         LOG_CMDLINES=true
         JTREG_VERBOSE=fail,error,time
-        TEST=${{ matrix.test }}
+        TEST=${{ matrix.suites }}
         TEST_OPTS_JAVA_OPTIONS=
         JTREG_KEYWORDS="!headful"
 
     - name: Create suitable test log artifact name
-      run: echo ("::set-env name=suite::${{ matrix.test }}" -replace "test/", "" -replace "/jtreg", "" -replace "/:", "_" -replace "/", "_")
+      run: echo ("::set-env name=logsuffix::${{ matrix.test }}" -replace "_", "" -replace " ", "")
       if: ${{ failure() }}
 
-    - name: Persist test logs
+    - name: Persist test logs if any test fails
       uses: actions/upload-artifact@v2
       if: ${{ failure() }}
       with:
-        name: windows-x64-debug_testlogs_${{ env.suite }}
+        name: windows-x64${{ matrix.artifact }}_testlogs_${{ env.logsuffix }}
         path: |
           build/*/test-results/
           build/*/test-resupport/
