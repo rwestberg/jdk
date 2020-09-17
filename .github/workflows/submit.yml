@@ -62,13 +62,13 @@ jobs:
         - flavor: build release
           artifact: 
         - flavor: build debug
-          flags: --enable-debug
+          flags: "--enable-debug"
           artifact: -debug
-        - flavor: build no-pch
-          flags: --disable-precompiled-headers
+        - flavor: build-only no-pch
+          flags: "--disable-precompiled-headers"
           build-target: hotspot
-        - flavor: build aarch64
-          flags: --openjdk-target=aarch64-linux-gnu
+        - flavor: build-only aarch64
+          flags: "--openjdk-target=aarch64-linux-gnu"
           build-target: hotspot
 
     env:
@@ -121,7 +121,6 @@ jobs:
         bash configure
         --with-conf-name=linux-x64
         ${{ matrix.flags }}
-        --with-target-bits=64
         --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA}
         --with-version-build=0
         --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}
