@@ -236,7 +236,7 @@ jobs:
 
     - name: Run tests
       run: >
-        JDK_IMAGE_DIR=${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-16-internal+0_linux-x64_bin${{ matrix.artifact }}/${{ env.imageroot }}
+        JDK_IMAGE_DIR=${{ env.imageroot }}
         TEST_IMAGE_DIR=${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-16-internal+0_linux-x64_bin-tests${{ matrix.artifact }}
         BOOT_JDK=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}
         JT_HOME=${HOME}/jtreg
