@@ -231,7 +231,7 @@ jobs:
 
     - name: Find root of jdk image dir
       run: |
-        imageroot = `find ${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-16-internal+0_linux-x64_bin${{ matrix.artifact }} -name release -type f`
+        imageroot=`find ${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-16-internal+0_linux-x64_bin${{ matrix.artifact }} -name release -type f`
         echo "::set-env name=imageroot::`dirname ${imageroot}`"
 
     - name: Run tests
