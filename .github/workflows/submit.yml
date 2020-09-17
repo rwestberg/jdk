@@ -140,7 +140,7 @@ jobs:
         path: |
           jdk/build/linux-x64${{ matrix.artifact }}/bundles/jdk-16-internal+0_linux-x64_bin${{ matrix.artifact }}.tar.gz
           jdk/build/linux-x64${{ matrix.artifact }}/bundles/jdk-16-internal+0_linux-x64_bin${{ matrix.artifact }}.tar.gz
-      if: !matrix.build-only
+      if: matrix.build-only == false
 
   linux_x64_test:
     if: true
