@@ -66,7 +66,7 @@ jobs:
           artifact: -debug
         - flavor: build no-pch
           flags: --disable-precompiled-headers
-          build-only: true
+          build-target: exploded-image
 
     env:
       BOOT_JDK_FILENAME: 'openjdk-14.0.2_linux-x64_bin.tar.gz'
@@ -130,7 +130,7 @@ jobs:
       working-directory: jdk
 
     - name: Build
-      run: make CONF_NAME=linux-x64
+      run: make CONF_NAME=linux-x64 ${{ matrix.build-target }}
       working-directory: jdk
 
     - name: Persist test bundles
@@ -140,7 +140,7 @@ jobs:
         path: |
           jdk/build/linux-x64${{ matrix.artifact }}/bundles/jdk-16-internal+0_linux-x64_bin${{ matrix.artifact }}.tar.gz
           jdk/build/linux-x64${{ matrix.artifact }}/bundles/jdk-16-internal+0_linux-x64_bin${{ matrix.artifact }}.tar.gz
-      if: matrix.build-only == false
+      if: matrix.build-target == false
 
   linux_x64_test:
     if: true
@@ -243,19 +243,19 @@ jobs:
         CONF_NAME=run-test-prebuilt
         LOG_CMDLINES=true
         JTREG_VERBOSE=fail,error,time
-        TEST=${{ matrix.test }}
+        TEST="${{ matrix.suites }}"
         TEST_OPTS_JAVA_OPTIONS=
         JTREG_KEYWORDS="!headful"
 
     - name: Create suitable test log artifact name
-      run: echo "::set-env name=suite::`echo ${{ matrix.test }} | sed -e 's!test/!!' -e 's!/jtreg!!' -e 's!/:!_!' -e 's!/!_!g'`"
+      run: echo "::set-env name=logsuffix::`echo ${{ matrix.test }} | sed -e 's!/!_!'g -e 's! !_!'g`"
       if: ${{ failure() }}
 
-    - name: Persist test logs
+    - name: Persist test logs if any test fails
       uses: actions/upload-artifact@v2
       if: ${{ failure() }}
       with:
-        name: linux-x64${{ matrix.artifact }}_testlogs_${{ env.suite }}
+        name: linux-x64${{ matrix.artifact }}_testlogs_${{ env.logsuffix }}
         path: |
           build/*/test-results/
           build/*/test-resupport/
