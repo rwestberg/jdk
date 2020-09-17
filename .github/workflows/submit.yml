@@ -57,18 +57,19 @@ jobs:
         flavor:
           - build release
           - build debug
-          - build no-pch
+          - build-only no-pch
+          - build-only aarch64
         include:
         - flavor: build release
           artifact: 
         - flavor: build debug
-          flags: "--enable-debug"
+          flags: --enable-debug
           artifact: -debug
         - flavor: build-only no-pch
-          flags: "--disable-precompiled-headers"
+          flags: --disable-precompiled-headers
           build-target: hotspot
         - flavor: build-only aarch64
-          flags: "--openjdk-target=aarch64-linux-gnu"
+          flags: --openjdk-target=aarch64-linux-gnu CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++
           build-target: hotspot
 
     env:
@@ -115,6 +116,10 @@ jobs:
 
     - name: Install dependencies
       run: sudo apt-get install libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
+
+    - name: Install cross-compilation dependencies
+      run: sudo apt-get install gcc-9-aarch64-linux-gnu
+      if: contains(matrix.flavor, 'aarch64')
 
     - name: Configure
       run: >
