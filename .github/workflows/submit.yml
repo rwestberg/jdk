@@ -138,8 +138,8 @@ jobs:
       with:
         name: jdk-linux-x64${{ matrix.artifact }}_${{ env.bundleid }}
         path: |
-          jdk/build/linux-x64${{ matrix.artifact }}/bundles/jdk-16-internal+0_linux-x64_bin${{ matrix.artifact }}.tar.gz
-          jdk/build/linux-x64${{ matrix.artifact }}/bundles/jdk-16-internal+0_linux-x64_bin${{ matrix.artifact }}.tar.gz
+          jdk/build/linux-x64/bundles/jdk-16-internal+0_linux-x64_bin${{ matrix.artifact }}.tar.gz
+          jdk/build/linux-x64/bundles/jdk-16-internal+0_linux-x64_bin-tests${{ matrix.artifact }}.tar.gz
       if: matrix.build-target == false
 
   linux_x64_test:
@@ -230,12 +230,14 @@ jobs:
         mkdir -p "${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-16-internal+0_linux-x64_bin-tests${{ matrix.artifact }}"
         tar -xf "${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-16-internal+0_linux-x64_bin-tests${{ matrix.artifact }}.tar.gz" -C "${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-16-internal+0_linux-x64_bin-tests${{ matrix.artifact }}"
 
-    - name: Inspect artifacts
-      run: find ${HOME}/jdk-linux-x64${{ matrix.artifact }} -type f
+    - name: Find root of jdk image dir
+      run: |
+        imageroot = `find ${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-16-internal+0_linux-x64_bin${{ matrix.artifact }} release -type f`
+        echo "::set-env name=imageroot::`dirname ${imageroot}`"
 
     - name: Run tests
       run: >
-        JDK_IMAGE_DIR=${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-16-internal+0_linux-x64_bin${{ matrix.artifact }}/jdk-16/fastdebug
+        JDK_IMAGE_DIR=${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-16-internal+0_linux-x64_bin${{ matrix.artifact }}/${{ env.imageroot }}
         TEST_IMAGE_DIR=${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-16-internal+0_linux-x64_bin-tests${{ matrix.artifact }}
         BOOT_JDK=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}
         JT_HOME=${HOME}/jtreg
