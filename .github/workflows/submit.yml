@@ -4,7 +4,7 @@ on:
   push:
     branches-ignore:
     - 'master'
-    - '!${{ secrets.JDK_SUBMIT_BRANCHES }}'
+    - '${{ secrets.JDK_SUBMIT_BRANCHES }}'
 
 env:
   BOOT_JDK_VERSION: '14.0.2'
