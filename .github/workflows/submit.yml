@@ -473,7 +473,7 @@ jobs:
         tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-16-internal+0_windows-x64_bin-tests${{ matrix.artifact }}.tar.gz" -C "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-16-internal+0_windows-x64_bin-tests${{ matrix.artifact }}"
 
     - name: Find root of jdk image dir
-      run: echo ("::set-env name=imageroot::" + (Get-ChildItem -Path $HOME/jdk-windows-x64${{ matrix.artifact }}/jdk-16-internal+0_windows-x64_bin${{ matrix.artifact }} -Filter bash.exe -Recurse -ErrorAction SilentlyContinue -Force).DirectoryName)
+      run: echo ("::set-env name=imageroot::" + (Get-ChildItem -Path $HOME/jdk-windows-x64${{ matrix.artifact }}/jdk-16-internal+0_windows-x64_bin${{ matrix.artifact }} -Filter release -Recurse -ErrorAction SilentlyContinue -Force).DirectoryName)
 
     - name: Run tests
       run: >
