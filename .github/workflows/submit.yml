@@ -3,7 +3,6 @@ name: Submit tests
 on:
   push:
     branches:
-    - '${{ secrets.JDK_SUBMIT_BRANCHES }}'
     - '!master'
 
 env:
