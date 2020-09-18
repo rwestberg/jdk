@@ -2,9 +2,10 @@ name: Submit tests
 
 on:
   push:
-    branches-ignore:
-    - 'master'
+    branches:
+    - '**'
     - '${{ secrets.JDK_SUBMIT_BRANCHES }}'
+    - '!master'
 
 env:
   BOOT_JDK_VERSION: '14.0.2'
