@@ -59,8 +59,6 @@ jobs:
           - build debug
           - build-only no-pch
         include:
-        - flavor: build release
-          artifact: 
         - flavor: build debug
           flags: --enable-debug
           artifact: -debug
@@ -274,8 +272,6 @@ jobs:
           - build release
           - build debug
         include:
-        - flavor: build release
-          artifact: 
         - flavor: build debug
           flags: --enable-debug
           artifact: -debug
@@ -521,7 +517,6 @@ jobs:
         flavor:
           - build release
           - build debug
-          - build-only no-pch
         include:
         - flavor: build release
           artifact: 
