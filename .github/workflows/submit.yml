@@ -13,9 +13,14 @@ jobs:
   prerequisites:
     name: Prerequisites
     runs-on: 'ubuntu-latest'
-    if: (secrets.JDK_SUBMIT_BRANCHES == '') || startsWith(github.ref, secrets.JDK_SUBMIT_BRANCHES)
+    outputs:
+      autorun: ${{ steps.step1.outputs.test }}
   
     steps:
+    - name: Check if submit tests should be executed for this branch
+      run:
+        run: echo "::set-output name=autorun::${{ (secrets.JDK_SUBMIT_BRANCHES == '') || startsWith(github.ref, secrets.JDK_SUBMIT_BRANCHES) }}"
+
     - name: Determine unique bundle identifier
       run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
 
@@ -48,10 +53,10 @@ jobs:
         path: ~/jtreg/
 
   linux_x64_build:
-    if: true
     name: Linux x64
     runs-on: 'ubuntu-latest'
     needs: prerequisites
+    if: ${{needs.prerequisites.outputs.autorun}}
 
     strategy:
       fail-fast: false
