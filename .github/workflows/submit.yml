@@ -31,27 +31,29 @@ jobs:
       with:
         path: ~/jtreg/
         key: jtreg-${{ env.JTREG_VERSION }}-v1
+      if: steps.check_submit.outputs.should_run != 'false'
 
     - name: Checkout the jtreg source
       uses: actions/checkout@v2
       with:
         repository: 'openjdk/jtreg'
         ref: ${{ env.JTREG_VERSION }}
-      if: steps.jtreg.outputs.cache-hit != 'true'
+      if: steps.check_submit.outputs.should_run != 'false' && steps.jtreg.outputs.cache-hit != 'true'
 
     - name: Build jtreg
       run: sh make/build-all.sh ${JAVA_HOME}
-      if: steps.jtreg.outputs.cache-hit != 'true'
+      if: steps.check_submit.outputs.should_run != 'false' && steps.jtreg.outputs.cache-hit != 'true'
 
     - name: Move jtreg image to destination folder
       run: mv build/images/jtreg ~/
-      if: steps.jtreg.outputs.cache-hit != 'true'
+      if: steps.check_submit.outputs.should_run != 'false' && steps.jtreg.outputs.cache-hit != 'true'
 
     - name: Store jtreg for later steps
       uses: actions/upload-artifact@v2
       with:
         name: jtreg_${{ env.JTREG_VERSION }}_${{ env.bundleid }}
         path: ~/jtreg/
+      if: steps.check_submit.outputs.should_run != 'false'
 
   linux_x64_build:
     name: Linux x64
