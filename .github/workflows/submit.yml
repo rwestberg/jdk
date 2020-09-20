@@ -56,7 +56,7 @@ jobs:
     name: Linux x64
     runs-on: 'ubuntu-latest'
     needs: prerequisites
-    if: needs.prerequisites.outputs.autorun == yes
+    if: needs.prerequisites.outputs.autorun == 42
 
     strategy:
       fail-fast: false
