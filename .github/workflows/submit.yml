@@ -264,9 +264,7 @@ jobs:
       if: ${{ failure() }}
       with:
         name: linux-x64${{ matrix.artifact }}_testlogs_${{ env.logsuffix }}
-        path: |
-          build/*/test-results/
-          build/*/test-resupport/
+        path: build/*/test-**
 
   windows_x64_build:
     name: Windows x64
@@ -509,9 +507,7 @@ jobs:
       if: ${{ failure() }}
       with:
         name: windows-x64${{ matrix.artifact }}_testlogs_${{ env.logsuffix }}
-        path: |
-          build/*/test-results/
-          build/*/test-resupport/
+        path: build/*/test-**
 
   macos_x64_build:
     name: macOS x64
@@ -723,6 +719,4 @@ jobs:
       if: ${{ failure() }}
       with:
         name: macos-x64${{ matrix.artifact }}_testlogs_${{ env.logsuffix }}
-        path: |
-          build/*/test-results/
-          build/*/test-resupport/
+        path: build/*/test-**
