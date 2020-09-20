@@ -2,7 +2,9 @@ name: Submit tests
 
 on:
   push:
-    branches-ignore: [master]
+    branches-ignore:
+      - master
+  workflow_dispatch:
 
 env:
   BOOT_JDK_VERSION: "14.0.2"
