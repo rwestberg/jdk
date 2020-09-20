@@ -264,7 +264,7 @@ jobs:
         if: ${{ failure() }}
         with:
           name: linux-x64${{ matrix.artifact }}_testlogs_${{ env.logsuffix }}
-          path: build/*/test-**
+          path: build/*/test-results
 
   windows_x64_build:
     name: Windows x64
@@ -499,7 +499,7 @@ jobs:
           JTREG_KEYWORDS="!headful"
 
       - name: Create suitable test log artifact name
-        run: echo ("::set-env name=logsuffix::${{ matrix.test }}" -replace "_", "" -replace " ", "")
+        run: echo ("::set-env name=logsuffix::" + "${{ matrix.test }}" -replace "/", "_" -replace " ", "_")
         if: ${{ failure() }}
 
       - name: Persist test logs if any test fails
@@ -507,7 +507,7 @@ jobs:
         if: ${{ failure() }}
         with:
           name: windows-x64${{ matrix.artifact }}_testlogs_${{ env.logsuffix }}
-          path: build/*/test-**
+          path: build/*/test-results
 
   macos_x64_build:
     name: macOS x64
@@ -718,4 +718,4 @@ jobs:
         if: ${{ failure() }}
         with:
           name: macos-x64${{ matrix.artifact }}_testlogs_${{ env.logsuffix }}
-          path: build/*/test-**
+          path: build/*/test-results
