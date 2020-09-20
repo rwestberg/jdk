@@ -67,12 +67,12 @@ jobs:
         flavor:
           - build release
           - build debug
-          - build-only no-pch
+          - build-only hotspot no-pch
         include:
           - flavor: build debug
             flags: --enable-debug
             artifact: -debug
-          - flavor: build-only no-pch
+          - flavor: build-only hotspot no-pch
             flags: --disable-precompiled-headers
             build-target: hotspot
 
