@@ -19,10 +19,7 @@ jobs:
     steps:
     - name: Check if submit tests should be executed for this branch
       id: check_submit
-      run: |
-        echo "${{ github.ref }}"
-        echo "${{ startsWith(github.ref, 'refs/heads/submit_') }}"
-        echo "::set-output name=should_run::${{ startsWith(github.ref, 'refs/head/submit_') }}"
+      run: echo "::set-output name=should_run::${{ startsWith(github.ref, 'refs/heads/submit_') }}"
 
     - name: Determine unique bundle identifier
       run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
