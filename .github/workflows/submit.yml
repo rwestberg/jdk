@@ -14,12 +14,12 @@ jobs:
     name: Prerequisites
     runs-on: 'ubuntu-latest'
     outputs:
-      autorun: ${{ steps.step1.outputs.test }}
+      autorun: ${{ steps.check_autorun.outputs.autorun }}
   
     steps:
     - name: Check if submit tests should be executed for this branch
-      run:
-        run: echo "::set-output name=autorun::${{ (secrets.JDK_SUBMIT_BRANCHES == '') || startsWith(github.ref, secrets.JDK_SUBMIT_BRANCHES) }}"
+      id: check_autorun
+      run: echo "::set-output name=autorun::${{ (secrets.JDK_SUBMIT_BRANCHES == '') || startsWith(github.ref, secrets.JDK_SUBMIT_BRANCHES) }}"
 
     - name: Determine unique bundle identifier
       run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
