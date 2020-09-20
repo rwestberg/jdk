@@ -56,7 +56,7 @@ jobs:
     name: Linux x64
     runs-on: 'ubuntu-latest'
     needs: prerequisites
-    if: ${{needs.prerequisites.outputs.autorun}}
+    if: needs.prerequisites.outputs.autorun
 
     strategy:
       fail-fast: false
@@ -79,6 +79,9 @@ jobs:
       BOOT_JDK_SHA256: '91310200f072045dc6cef2c8c23e7e6387b37c46e9de49623ce0fa461a24623d'
 
     steps:
+    - name: Check value
+      run: echo "Autorun is ${{ needs.prerequisites.outputs.autorun }}"
+
     - name: Determine unique bundle identifier
       run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
 
