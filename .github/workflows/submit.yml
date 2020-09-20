@@ -2,10 +2,7 @@ name: Submit tests
 
 on:
   push:
-    branches:
-    - '**'
-    - ${{ secrets.JDK_SUBMIT_BRANCHES }}
-    - '!master'
+    branches-ignore: [master]
 
 env:
   BOOT_JDK_VERSION: '14.0.2'
@@ -16,6 +13,8 @@ jobs:
   prerequisites:
     name: Prerequisites
     runs-on: 'ubuntu-latest'
+    if: (secrets.JDK_SUBMIT_BRANCHES == '') || startsWith(github.ref, secrets.JDK_SUBMIT_BRANCHES)
+  
     steps:
     - name: Determine unique bundle identifier
       run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
