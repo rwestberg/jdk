@@ -48,7 +48,7 @@ jobs:
         with:
           path: ~/jtreg/
           key: jtreg-${{ env.JTREG_VERSION }}-v1
-        if: steps.check_submit.outputs.should_run != 'false' && steps.check_platforms.outputs.platform_linux.x64 != 'false'
+        if: steps.check_submit.outputs.should_run != 'false'
 
       - name: Checkout the jtreg source
         uses: actions/checkout@v2
@@ -76,7 +76,7 @@ jobs:
     name: Linux x64
     runs-on: "ubuntu-latest"
     needs: prerequisites
-    if: needs.prerequisites.outputs.should_run != 'false'
+    if: needs.prerequisites.outputs.should_run != 'false' && needs.prerequisites.outputs.platform_linux.x64 != 'false'
 
     strategy:
       fail-fast: false
@@ -287,7 +287,7 @@ jobs:
     name: Windows x64
     runs-on: "windows-latest"
     needs: prerequisites
-    if: needs.prerequisites.outputs.should_run != 'false'
+    if: needs.prerequisites.outputs.should_run != 'false' && needs.prerequisites.outputs.platform_windows.x64 != 'false'
 
     strategy:
       fail-fast: false
@@ -530,7 +530,7 @@ jobs:
     name: macOS x64
     runs-on: "macos-latest"
     needs: prerequisites
-    if: needs.prerequisites.outputs.should_run != 'false'
+    if: needs.prerequisites.outputs.should_run != 'false' && needs.prerequisites.outputs.platform_macos.x64 != 'false'
 
     strategy:
       fail-fast: false
