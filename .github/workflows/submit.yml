@@ -1,4 +1,4 @@
-name: Submit tests
+name: Pre-submit tests
 
 on:
   push:
