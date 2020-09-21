@@ -34,9 +34,9 @@ jobs:
       - name: Check which platforms should be included
         id: check_platforms
         run: |
-          echo "::set-output name=platform_linux_x64::${{ (github.event.inputs.platforms == '' || contains(github.event.inputs.platforms, 'linux x64')) || (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'linux x64')) }}"
-          echo "::set-output name=platform_windows_x64::${{ (github.event.inputs.platforms == '' || contains(github.event.inputs.platforms, 'windows x64')) || (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'windows x64')) }}"
-          echo "::set-output name=platform_macos_x64::${{ (github.event.inputs.platforms == '' || contains(github.event.inputs.platforms, 'macos x64')) || (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'macos x64')) }}"
+          echo "::set-output name=platform_linux_x64::${{ contains(github.event.inputs.platforms, 'linux x64') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'linux x64'))) }}"
+          echo "::set-output name=platform_windows_x64::${{ contains(github.event.inputs.platforms, 'windows x64') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'windows x64'))) }}"
+          echo "::set-output name=platform_macos_x64::${{ contains(github.event.inputs.platforms, 'macos x64') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'macos x64'))) }}"
 
       - name: Determine unique bundle identifier
         run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
