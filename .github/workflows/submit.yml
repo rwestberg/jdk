@@ -52,11 +52,14 @@ jobs:
 
       - name: Determine versions and locations to be used for dependencies
         id: check_deps
-        run: "echo ::set-output name=dependencies::`cat make/conf/test-dependencies | sed -e '1i {' -e 's/#.*//g' -e 's/\"//g' -e 's/(.*)=(.*)/\"\\1\": \"\\2\",/g' -e '$s/,\\s{0,}$/}/'`"
+        run: "echo ::set-output name=dependencies::`cat make/conf/test-dependencies | sed -e '1i {' -e 's/#.*//g' -e 's/\"//g' -e 's/\\(.*\\)=\\(.*\\)/\"\\1\": \"\\2\",/g' -e '$s/,\\s\\{0,\\}$/\\}/'`"
         working-directory: jdk
 
       - name: See what happened
         run: "echo ${{ steps.check_deps.outputs.dependencies }}"
+
+      - name: Done
+        run: exit 1
 
       - name: Check if a jtreg image is present in the cache
         id: jtreg
