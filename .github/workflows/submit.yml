@@ -25,6 +25,7 @@ jobs:
       platform_linux_x64: ${{ steps.check_platforms.outputs.platform_linux_x64 }}
       platform_windows_x64: ${{ steps.check_platforms.outputs.platform_windows_x64 }}
       platform_macos_x64: ${{ steps.check_platforms.outputs.platform_macos_x64 }}
+      dependencies: ${{ steps.check_deps.outputs.dependencies }}
 
     steps:
       - name: Check if submit tests should actually run depending on secrets and manual triggering
@@ -43,6 +44,16 @@ jobs:
         run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
         if: steps.check_submit.outputs.should_run != 'false'
 
+      - name: Checkout the source
+        uses: actions/checkout@v2
+        with:
+          path: jdk
+
+      - name: Determine versions and locations to be used for dependencies
+        id: check_deps
+        run: "echo ::set-output name=dependencies::`cat make/pre-submit-tests-dependencies | sed -e '1i {' -e 's/#.*//g' -e 's/\"//g' -e 's/(.*)=(.*)/\"\\1\": \"\\2\",/g' -e '$s/,\\s{0,}$/}/'`"
+        working-directory: jdk
+
       - name: Check if a jtreg image is present in the cache
         id: jtreg
         uses: actions/cache@v2
@@ -56,14 +67,17 @@ jobs:
         with:
           repository: "openjdk/jtreg"
           ref: ${{ env.JTREG_VERSION }}
+          path: jtreg
         if: steps.check_submit.outputs.should_run != 'false' && steps.jtreg.outputs.cache-hit != 'true'
 
       - name: Build jtreg
         run: sh make/build-all.sh ${JAVA_HOME}
+        working-directory: jtreg
         if: steps.check_submit.outputs.should_run != 'false' && steps.jtreg.outputs.cache-hit != 'true'
 
       - name: Move jtreg image to destination folder
         run: mv build/images/jtreg ~/
+        working-directory: jtreg
         if: steps.check_submit.outputs.should_run != 'false' && steps.jtreg.outputs.cache-hit != 'true'
 
       - name: Store jtreg for later steps
