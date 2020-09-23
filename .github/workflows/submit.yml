@@ -13,8 +13,6 @@ on:
 
 env:
   BOOT_JDK_VERSION: "14.0.2"
-  JTREG_VERSION: "5.1"
-  JTREG_BUILD: ""
   GTEST_VERSION: "release-1.8.1"
 
 jobs:
@@ -52,14 +50,14 @@ jobs:
 
       - name: Determine versions and locations to be used for dependencies
         id: check_deps
-        run: "echo ::set-output name=dependencies::`cat make/conf/test-dependencies | sed -e '1i {' -e 's/#.*//g' -e 's/\"//g' -e 's/\\(.*\\)=\\(.*\\)/\"\\1\": \"\\2\",/g' -e '$s/,\\s\\{0,\\}$/\\}/'`"
+        run: "echo ::set-output name=dependencies::`cat make/autoconf/version-numbers make/conf/test-dependencies | sed -e '1i {' -e 's/#.*//g' -e 's/\"//g' -e 's/\\(.*\\)=\\(.*\\)/\"\\1\": \"\\2\",/g' -e '$s/,\\s\\{0,\\}$/\\}/'`"
         working-directory: jdk
 
       - name: See what happened
-        run: "echo ${{ steps.check_deps.outputs.dependencies }}"
+        run: "echo '${{ steps.check_deps.outputs.dependencies }}"
 
-      - name: Populate the environment
-        run: "echo ::set-env name=JTREG_VERSION::jtreg-${{ fromJson(steps.check_deps.outputs.dependencies).JTREG_VERSION }}-"
+      - name: Determine the jtreg ref to checkout
+        run: "echo ::set-env name=JTREG_REF::jtreg-${{ fromJson(steps.check_deps.outputs.dependencies).JTREG_VERSION }}-${{ fromJson(steps.check_deps.outputs.dependencies).JTREG_BUILD }}"
 
       - name: Done
         run: exit 1 
@@ -69,14 +67,14 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/jtreg/
-          key: jtreg-${{ env.JTREG_VERSION }}-v1
+          key: jtreg-${{ env.JTREG_REF }}-v1
         if: steps.check_submit.outputs.should_run != 'false'
 
       - name: Checkout the jtreg source
         uses: actions/checkout@v2
         with:
           repository: "openjdk/jtreg"
-          ref: ${{ env.JTREG_VERSION }}
+          ref: ${{ env.JTREG_REF }}
           path: jtreg
         if: steps.check_submit.outputs.should_run != 'false' && steps.jtreg.outputs.cache-hit != 'true'
 
@@ -93,7 +91,7 @@ jobs:
       - name: Store jtreg for later steps
         uses: actions/upload-artifact@v2
         with:
-          name: jtreg_${{ env.JTREG_VERSION }}_${{ env.bundleid }}
+          name: jtreg_${{ env.bundleid }}
           path: ~/jtreg/
         if: steps.check_submit.outputs.should_run != 'false'
 
@@ -150,7 +148,7 @@ jobs:
       - name: Restore jtreg artifact
         uses: actions/download-artifact@v2
         with:
-          name: jtreg_${{ env.JTREG_VERSION }}_${{ env.bundleid }}
+          name: jtreg_${{ env.bundleid }}
           path: ~/jtreg/
 
       - name: Checkout gtest sources
@@ -259,7 +257,7 @@ jobs:
       - name: Restore jtreg artifact
         uses: actions/download-artifact@v2
         with:
-          name: jtreg_${{ env.JTREG_VERSION }}_${{ env.bundleid }}
+          name: jtreg_${{ env.bundleid }}
           path: ~/jtreg/
 
       - name: Restore build artifacts
@@ -378,7 +376,7 @@ jobs:
       - name: Restore jtreg artifact
         uses: actions/download-artifact@v2
         with:
-          name: jtreg_${{ env.JTREG_VERSION }}_${{ env.bundleid }}
+          name: jtreg_${{ env.bundleid }}
           path: ~/jtreg/
 
       - name: Configure
@@ -496,7 +494,7 @@ jobs:
       - name: Restore jtreg artifact
         uses: actions/download-artifact@v2
         with:
-          name: jtreg_${{ env.JTREG_VERSION }}_${{ env.bundleid }}
+          name: jtreg_${{ env.bundleid }}
           path: ~/jtreg/
 
       - name: Restore build artifacts
@@ -601,7 +599,7 @@ jobs:
       - name: Restore jtreg artifact
         uses: actions/download-artifact@v2
         with:
-          name: jtreg_${{ env.JTREG_VERSION }}_${{ env.bundleid }}
+          name: jtreg_${{ env.bundleid }}
           path: ~/jtreg/
 
       - name: Checkout gtest sources
@@ -710,7 +708,7 @@ jobs:
       - name: Restore jtreg artifact
         uses: actions/download-artifact@v2
         with:
-          name: jtreg_${{ env.JTREG_VERSION }}_${{ env.bundleid }}
+          name: jtreg_${{ env.bundleid }}
           path: ~/jtreg/
 
       - name: Restore build artifacts
