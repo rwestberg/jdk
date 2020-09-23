@@ -138,7 +138,7 @@ jobs:
           wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
           echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
           tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
-          mv "${HOME}/bootjdk/"*/* ""${HOME}/bootjdk/"
+          mv "${HOME}/bootjdk/"*/* "${HOME}/bootjdk/"
         if: steps.bootjdk.outputs.cache-hit != 'true'
 
       - name: Restore jtreg artifact
@@ -254,7 +254,7 @@ jobs:
           wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
           echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
           tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
-          mv "${HOME}/bootjdk/"*/* ""${HOME}/bootjdk/"
+          mv "${HOME}/bootjdk/"*/* "${HOME}/bootjdk/"
         if: steps.bootjdk.outputs.cache-hit != 'true'
 
       - name: Restore jtreg artifact
