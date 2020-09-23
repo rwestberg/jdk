@@ -49,7 +49,7 @@ jobs:
         run: "echo ::set-output name=dependencies::`cat make/autoconf/version-numbers make/conf/test-dependencies | sed -e '1i {' -e 's/#.*//g' -e 's/\"//g' -e 's/\\(.*\\)=\\(.*\\)/\"\\1\": \"\\2\",/g' -e '$s/,\\s\\{0,\\}$/\\}/'`"
         working-directory: jdk
 
-      - name: See what happened
+      - name: Print extracted dependencies to the log
         run: "echo '${{ steps.check_deps.outputs.dependencies }}'"
 
       - name: Determine the jtreg ref to checkout
