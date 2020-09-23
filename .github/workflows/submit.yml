@@ -54,7 +54,7 @@ jobs:
         working-directory: jdk
 
       - name: See what happened
-        run: "echo '${{ steps.check_deps.outputs.dependencies }}' | jq"
+        run: "echo '${{ steps.check_deps.outputs.dependencies }}'"
 
       - name: Determine the jtreg ref to checkout
         run: "echo ::set-env name=JTREG_REF::jtreg-${{ fromJson(steps.check_deps.outputs.dependencies).JTREG_VERSION }}-${{ fromJson(steps.check_deps.outputs.dependencies).JTREG_BUILD }}"
