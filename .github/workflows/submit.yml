@@ -58,8 +58,11 @@ jobs:
       - name: See what happened
         run: "echo ${{ steps.check_deps.outputs.dependencies }}"
 
+      - name: Populate the environment
+        run: "echo ::set-env name=JTREG_VERSION::jtreg-${{ fromJson(steps.check_deps.outputs.dependencies).JTREG_VERSION }}-"
+
       - name: Done
-        run: exit 1
+        run: exit 1 
 
       - name: Check if a jtreg image is present in the cache
         id: jtreg
