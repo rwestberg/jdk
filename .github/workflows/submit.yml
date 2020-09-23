@@ -188,7 +188,9 @@ jobs:
   linux_x64_test:
     name: Linux x64
     runs-on: "ubuntu-latest"
-    needs: linux_x64_build
+    needs:
+      - prerequisites
+      - linux_x64_build
 
     strategy:
       fail-fast: false
@@ -422,7 +424,9 @@ jobs:
   windows_x64_test:
     name: Windows x64
     runs-on: "windows-latest"
-    needs: windows_x64_build
+    needs:
+      - prerequisites
+      - windows_x64_build
 
     strategy:
       fail-fast: false
@@ -661,7 +665,9 @@ jobs:
   macos_x64_test:
     name: macOS x64
     runs-on: "macos-latest"
-    needs: macos_x64_build
+    needs:
+      - prerequisites
+      - macos_x64_build
 
     strategy:
       fail-fast: false
