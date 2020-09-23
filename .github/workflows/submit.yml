@@ -11,10 +11,6 @@ on:
         required: true
         default: "Linux x64, Windows x64, macOS x64"
 
-env:
-  BOOT_JDK_VERSION: "14.0.2"
-  GTEST_VERSION: "release-1.8.1"
-
 jobs:
   prerequisites:
     name: Prerequisites
@@ -114,9 +110,10 @@ jobs:
             build-target: hotspot
 
     env:
-      BOOT_JDK_FILENAME: "openjdk-14.0.2_linux-x64_bin.tar.gz"
-      BOOT_JDK_URL: "https://download.java.net/java/GA/jdk14.0.2/205943a0976c4ed48cb16f1043c5c647/12/GPL/openjdk-14.0.2_linux-x64_bin.tar.gz"
-      BOOT_JDK_SHA256: "91310200f072045dc6cef2c8c23e7e6387b37c46e9de49623ce0fa461a24623d"
+      BOOT_JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).BOOT_JDK_VERSION }}"
+      BOOT_JDK_FILENAME: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_FILENAME }}"
+      BOOT_JDK_URL: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_URL }}"
+      BOOT_JDK_SHA256: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_SHA256 }}"
 
     steps:
       - name: Determine unique bundle identifier
@@ -152,7 +149,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: "google/googletest"
-          ref: ${{ env.GTEST_VERSION }}
+          ref: "${{ fromJson(needs.prerequisites.outputs.dependencies).GTEST_VERSION }}"
           path: gtest
 
       - name: Install dependencies
@@ -228,6 +225,12 @@ jobs:
           - test: hs/tier1 serviceability
             suites: test/hotspot/jtreg/:tier1_serviceability
             artifact: -debug
+
+    env:
+      BOOT_JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).BOOT_JDK_VERSION }}"
+      BOOT_JDK_FILENAME: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_FILENAME }}"
+      BOOT_JDK_URL: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_URL }}"
+      BOOT_JDK_SHA256: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_SHA256 }}"
 
     steps:
       - name: Determine unique bundle identifier
@@ -367,7 +370,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: "google/googletest"
-          ref: ${{ env.GTEST_VERSION }}
+          ref: "${{ fromJson(needs.prerequisites.outputs.dependencies).GTEST_VERSION }}"
           path: gtest
 
       - name: Restore jtreg artifact
@@ -603,7 +606,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: "google/googletest"
-          ref: ${{ env.GTEST_VERSION }}
+          ref: "${{ fromJson(needs.prerequisites.outputs.dependencies).GTEST_VERSION }}"
           path: gtest
 
       - name: Install dependencies
