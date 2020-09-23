@@ -110,6 +110,7 @@ jobs:
             build-target: hotspot
 
     env:
+      JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
       BOOT_JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).BOOT_JDK_VERSION }}"
       BOOT_JDK_FILENAME: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_FILENAME }}"
       BOOT_JDK_URL: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_URL }}"
@@ -129,7 +130,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
+          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-${{ env.BOOT_JDK_SHA256 }}-v1
 
       - name: Download boot JDK
         run: |
@@ -137,6 +138,7 @@ jobs:
           wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
           echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
           tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
+          mv "${HOME}/bootjdk/"*/* ""${HOME}/bootjdk/"
         if: steps.bootjdk.outputs.cache-hit != 'true'
 
       - name: Restore jtreg artifact
@@ -244,7 +246,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
+          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-${{ env.BOOT_JDK_SHA256 }}-v1
 
       - name: Download boot JDK
         run: |
@@ -252,6 +254,7 @@ jobs:
           wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
           echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
           tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
+          mv "${HOME}/bootjdk/"*/* ""${HOME}/bootjdk/"
         if: steps.bootjdk.outputs.cache-hit != 'true'
 
       - name: Restore jtreg artifact

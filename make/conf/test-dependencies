@@ -23,8 +23,7 @@
 # questions.
 #
 
-# Default versions and download locations for dependencies used by the
-# pre-submit testing.
+# Versions and download locations for dependencies used by pre-submit testing.
 
 BOOT_JDK_VERSION="14"
 JTREG_VERSION="5.1"
