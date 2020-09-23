@@ -57,7 +57,7 @@ jobs:
         run: "echo '${{ steps.check_deps.outputs.dependencies }}'"
 
       - name: Determine the jtreg ref to checkout
-        run: "echo ::set-env name=JTREG_REF::jtreg-${{ fromJson(steps.check_deps.outputs.dependencies).JTREG_VERSION }}-${{ fromJson(steps.check_deps.outputs.dependencies).JTREG_BUILD }}"
+        run: "echo ::set-env name=JTREG_REF::jtreg${{ fromJson(steps.check_deps.outputs.dependencies).JTREG_VERSION }}-${{ fromJson(steps.check_deps.outputs.dependencies).JTREG_BUILD }}"
 
       - name: Check if a jtreg image is present in the cache
         id: jtreg
