@@ -54,13 +54,10 @@ jobs:
         working-directory: jdk
 
       - name: See what happened
-        run: "echo '${{ steps.check_deps.outputs.dependencies }}'"
+        run: "echo '${{ steps.check_deps.outputs.dependencies }}' | jq"
 
       - name: Determine the jtreg ref to checkout
         run: "echo ::set-env name=JTREG_REF::jtreg-${{ fromJson(steps.check_deps.outputs.dependencies).JTREG_VERSION }}-${{ fromJson(steps.check_deps.outputs.dependencies).JTREG_BUILD }}"
-
-      - name: Done
-        run: exit 1 
 
       - name: Check if a jtreg image is present in the cache
         id: jtreg
