@@ -139,7 +139,6 @@ jobs:
           echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
           tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
           mv "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"*/* "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"
-          ls -l "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
         if: steps.bootjdk.outputs.cache-hit != 'true'
 
       - name: Restore jtreg artifact
@@ -255,7 +254,7 @@ jobs:
           wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
           echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
           tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
-          mv "${HOME}/bootjdk/"*/* "${HOME}/bootjdk/"
+          mv "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"*/* "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"
         if: steps.bootjdk.outputs.cache-hit != 'true'
 
       - name: Restore jtreg artifact
@@ -598,7 +597,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v2
+          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-${{ env.BOOT_JDK_SHA256 }}-v1
 
       - name: Download boot JDK
         run: |
@@ -606,6 +605,7 @@ jobs:
           wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
           echo "${BOOT_JDK_SHA256}  ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | shasum -a 256 -c >/dev/null -
           tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
+          mv "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"*/* "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"
         if: steps.bootjdk.outputs.cache-hit != 'true'
 
       - name: Restore jtreg artifact
@@ -631,7 +631,7 @@ jobs:
           ${{ matrix.flags }}
           --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA}
           --with-version-build=0
-          --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}.jdk/Contents/Home
+          --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/Contents/Home
           --with-jtreg=${HOME}/jtreg
           --with-gtest=${GITHUB_WORKSPACE}/gtest
           --with-default-make-target="product-bundles test-bundles"
@@ -713,7 +713,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-v1
+          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-${{ env.BOOT_JDK_SHA256 }}-v1
 
       - name: Download boot JDK
         run: |
@@ -721,6 +721,7 @@ jobs:
           wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
           echo "${BOOT_JDK_SHA256}  ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | shasum -a 256 -c >/dev/null -
           tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
+          mv "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"*/* "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"
         if: steps.bootjdk.outputs.cache-hit != 'true'
 
       - name: Restore jtreg artifact
@@ -757,7 +758,7 @@ jobs:
         run: >
           JDK_IMAGE_DIR=${{ env.imageroot }}
           TEST_IMAGE_DIR=${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-16-internal+0_osx-x64_bin-tests${{ matrix.artifact }}
-          BOOT_JDK=${HOME}/bootjdk/${BOOT_JDK_VERSION}/jdk-${BOOT_JDK_VERSION}.jdk/Contents/Home
+          BOOT_JDK=${HOME}/bootjdk/${BOOT_JDK_VERSION}/Contents/Home
           JT_HOME=${HOME}/jtreg
           gmake test-prebuilt
           CONF_NAME=run-test-prebuilt
