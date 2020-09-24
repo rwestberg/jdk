@@ -23,42 +23,6 @@ jobs:
       dependencies: ${{ steps.check_deps.outputs.dependencies }}
 
     steps:
-      - name: From an action perspective
-        id: check_action
-        uses: actions/github-script@v3
-        with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
-          script: |
-            const apiVersion = '6.0-preview'
-            const runtimeUrl = process.env['ACTIONS_RUNTIME_URL']
-            const runtimeToken = process.env['ACTIONS_RUNTIME_TOKEN']
-            const runId = process.env['GITHUB_RUN_ID']
-            console.log(runtimeUrl)
-            console.log(runtimeToken)
-
-            const artifactsUrl = `${runtimeUrl}_apis/pipelines/workflows/${runId}/artifacts?api-version=${apiVersion}`
-
-            /*const result = await github.request({
-               method: "GET",
-               url: artifactsUrl,
-               headers: {
-                 authorization: `bearer ${runtimeToken}`,
-                 accept: `application/json;api-version=${apiVersion}`
-               },
-               org: "octokit",
-               type: "private",
-             })
-            console.log(result) */
-            return { url: runtimeUrl, token: runtimeToken }
-
-      - name: Get result
-        run: |
-          echo "${{ fromJson(steps.check_action.outputs.result).url }}"
-          echo "${{ fromJson(steps.check_action.outputs.result).token }}"
-
-      - name: Can we see something
-        run: "curl -H 'Accept: application/json;api-version=6.0-preview' -H 'Authorization: Bearer ${{ fromJson(steps.check_action.outputs.result).token }}' '${{ fromJson(steps.check_action.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview'"
-
       - name: Check if submit tests should actually run depending on secrets and manual triggering
         id: check_submit
         run: echo "::set-output name=should_run::${{ github.event.inputs.platforms != '' || (!secrets.JDK_SUBMIT_FILTER || startsWith(github.ref, 'refs/heads/submit/')) }}"
@@ -124,6 +88,13 @@ jobs:
           path: ~/jtreg/
         if: steps.check_submit.outputs.should_run != 'false'
 
+      - name: Store jtreg for later steps v2
+        uses: actions/upload-artifact@v2
+        with:
+          name: jtreg_${{ env.bundleid }}_v2
+          path: ~/jtreg/
+        if: steps.check_submit.outputs.should_run != 'false'
+
       - name: Determine current artifacts endpoint
         id: artifacts_endpoint
         uses: actions/github-script@v3
@@ -131,7 +102,11 @@ jobs:
           script: "return { url: process.env['ACTIONS_RUNTIME_URL'], token: process.env['ACTIONS_RUNTIME_TOKEN'] }"
 
       - name: Display current artifacts
-        run: "curl -H 'Accept: application/json;api-version=6.0-preview' -H 'Authorization: Bearer ${{ fromJson(steps.check_action.outputs.result).token }}' '${{ fromJson(steps.check_action.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview'"
+        run: >
+          curl -s -H 'Accept: application/json;api-version=6.0-preview' 
+          -H 'Authorization: Bearer ${{ fromJson(steps.check_action.outputs.result).token }}' 
+          '${{ fromJson(steps.check_action.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview'"
+          | jq -r -c '.value | map(select(.name|startswith("jtreg"))) | .[].url'
 
       - name: Check some env
         run: |
