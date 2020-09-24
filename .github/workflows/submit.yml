@@ -24,6 +24,7 @@ jobs:
 
     steps:
       - name: From an action perspective
+        id: check_action
         uses: actions/github-script@v3
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
@@ -31,6 +32,9 @@ jobs:
           script: |
             const runtimeUrl = process.env['ACTIONS_RUNTIME_URL'];
             return runtimeUrl
+
+      - name: Get result
+        run: echo "${{steps.check_action.outputs.result}}"
 
       - name: Well then
         run: exit 1
