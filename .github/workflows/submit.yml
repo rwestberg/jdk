@@ -127,8 +127,14 @@ jobs:
           path: ~/jtreg/
         if: steps.check_submit.outputs.should_run != 'false'
 
-      - name: Can we see it?
-        run: "curl -H 'Accept: application/vnd.github.v3+json' https://api.github.com/repos/rwestberg/jdk/actions/runs/${{ github.run_id }}/artifacts"
+      - name: Determine current artifacts endpoint
+        id: artifacts_endpoint
+        uses: actions/github-script@v3
+        with:
+          script: "return { url: process.env['ACTIONS_RUNTIME_URL'], token: process.env['ACTIONS_RUNTIME_TOKEN'] }"
+
+      - name: Display current artifacts
+        run: "curl -H 'Accept: application/json;api-version=6.0-preview' -H 'Authorization: Bearer ${{ fromJson(steps.check_action.outputs.result).token }}' '${{ fromJson(steps.check_action.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview'"
 
       - name: Check some env
         run: |
