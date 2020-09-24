@@ -36,13 +36,13 @@ jobs:
             console.log(runtimeUrl)
             console.log(runtimeToken)
 
-            const artifactsUrl = `${runtimeUrl}_apis/pipelines/workflows/${runId}/artifacts?api-version=${this.apiVersion}`
+            const artifactsUrl = `${runtimeUrl}_apis/pipelines/workflows/${runId}/artifacts?api-version=${apiVersion}`
 
             const result = await github.request({
               method: "GET",
               url: artifactsUrl,
               headers: {
-                authorization: `token ${runtimeToken}`,
+                authorization: `bearer ${runtimeToken}`,
                 accept: `application/json;api-version=${apiVersion}`
               },
               org: "octokit",
