@@ -37,7 +37,7 @@ jobs:
         run: echo "${{ steps.check_action.outputs.result }}"
 
       - name: Can we see something
-        run: "curl -H 'Accept: application/json;api-version=6.0-preview' {{ steps.check_action.outputs.result }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview"
+        run: "curl -H 'Accept: application/json;api-version=6.0-preview' ${{ steps.check_action.outputs.result }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview"
 
       - name: Well then
         run: exit 1
