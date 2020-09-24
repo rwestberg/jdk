@@ -114,7 +114,7 @@ jobs:
           -H 'Authorization: Bearer ${{ fromJson(steps.artifacts_endpoint.outputs.result).token }}' 
           '${{ fromJson(steps.artifacts_endpoint.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview' |
           jq -r -c '.value | map(select(.name|startswith("jtreg"))) | .[].url'` do
-          echo url is "${url}""
+          echo url is "${url}"
           done
 
       - name: Delete artifacts
