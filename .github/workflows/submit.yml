@@ -38,17 +38,17 @@ jobs:
 
             const artifactsUrl = `${runtimeUrl}_apis/pipelines/workflows/${runId}/artifacts?api-version=${apiVersion}`
 
-            # const result = await github.request({
-            #   method: "GET",
-            #   url: artifactsUrl,
-            #   headers: {
-            #     authorization: `bearer ${runtimeToken}`,
-            #     accept: `application/json;api-version=${apiVersion}`
-            #   },
-            #   org: "octokit",
-            #   type: "private",
-            # })
-            #console.log(result)
+            /*const result = await github.request({
+               method: "GET",
+               url: artifactsUrl,
+               headers: {
+                 authorization: `bearer ${runtimeToken}`,
+                 accept: `application/json;api-version=${apiVersion}`
+               },
+               org: "octokit",
+               type: "private",
+             })
+            console.log(result) */
             return { url: runtimeUrl, token: runtimeToken }
 
       - name: Get result
