@@ -91,6 +91,12 @@ jobs:
       - name: Can we see it?
         run: "curl -H 'Accept: application/vnd.github.v3+json' https://api.github.com/repos/rwestberg/jdk/actions/runs/${{ github.run_id }}/artifacts"
 
+      - name: Check some env
+        run: |
+          echo ${ACTIONS_RUNTIME_URL}
+          echo ${GITHUB_RUN_ID}
+          echo ${ACTIONS_RUNTIME_TOKEN}
+
       - name: Done
         run: exit 1
 
