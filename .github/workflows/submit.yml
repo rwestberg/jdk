@@ -53,11 +53,11 @@ jobs:
 
       - name: Get result
         run: |
-          echo "${{ steps.check_action.outputs.result.url }}"
-          echo "${{ steps.check_action.outputs.result.token }}"
+          echo "${{ fromJson(steps.check_action.outputs.result).url }}"
+          echo "${{ fromJson(steps.check_action.outputs.result).token }}"
 
       - name: Can we see something
-        run: "curl -H 'Accept: application/json;api-version=6.0-preview' ${{ steps.check_action.outputs.result }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview"
+        run: "curl -H 'Accept: application/json;api-version=6.0-preview' -H 'Bearer ${{ fromJson(steps.check_action.outputs.result).token }}' '${{ fromJson(steps.check_action.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview'"
 
       - name: Well then
         run: exit 1
