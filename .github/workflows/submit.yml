@@ -88,6 +88,12 @@ jobs:
           path: ~/jtreg/
         if: steps.check_submit.outputs.should_run != 'false'
 
+      - name: Can we see it?
+        run: "curl -H 'Accept: application/vnd.github.v3+json' https://api.github.com/repos/rwestberg/jdk/actions/runs/${{ github.run_id }}/artifacts"
+
+      - name: Done
+        run: exit 1
+
   linux_x64_build:
     name: Linux x64
     runs-on: "ubuntu-latest"
