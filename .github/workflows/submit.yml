@@ -38,7 +38,7 @@ jobs:
 
             const artifactsUrl = `${runtimeUrl}_apis/pipelines/workflows/${runId}/artifacts?api-version=${this.apiVersion}`
 
-            const result = await request({
+            const result = await github.request({
               method: "GET",
               url: artifactsUrl,
               headers: {
@@ -48,10 +48,8 @@ jobs:
               org: "octokit",
               type: "private",
             })
-            const result = await github.request(artifactsUrl)
-            
-            console.log(result)
 
+            console.log(result)
             return { url: runtimeUrl, token: runtimeToken }
 
       - name: Get result
