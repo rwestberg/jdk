@@ -105,7 +105,7 @@ jobs:
         run: >
           curl -s -H 'Accept: application/json;api-version=6.0-preview'
           -H 'Authorization: Bearer ${{ fromJson(steps.check_action.outputs.result).token }}'
-          '${{ fromJson(steps.check_action.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview'"
+          '${{ fromJson(steps.check_action.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview'
 
       - name: Check some env
         run: |
