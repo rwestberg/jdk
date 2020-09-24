@@ -28,13 +28,15 @@ jobs:
         uses: actions/github-script@v3
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-          result-encoding: string
           script: |
             const runtimeUrl = process.env['ACTIONS_RUNTIME_URL'];
-            return runtimeUrl
+            const runtimeToken = process.env['ACTIONS_RUNTIME_TOKEN'];
+            return { 'url': runtimeUrl, 'token': runtimeToken };
 
       - name: Get result
-        run: echo "${{ steps.check_action.outputs.result }}"
+        run: |
+          echo "${{ steps.check_action.outputs.result.url }}"
+          echo "${{ steps.check_action.outputs.result.token }}"
 
       - name: Can we see something
         run: "curl -H 'Accept: application/json;api-version=6.0-preview' ${{ steps.check_action.outputs.result }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview"
