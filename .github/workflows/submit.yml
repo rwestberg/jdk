@@ -29,9 +29,30 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const runtimeUrl = process.env['ACTIONS_RUNTIME_URL'];
-            const runtimeToken = process.env['ACTIONS_RUNTIME_TOKEN'];
-            return { 'url': runtimeUrl, 'token': runtimeToken };
+            const apiVersion = '6.0-preview'
+            const runtimeUrl = process.env['ACTIONS_RUNTIME_URL']
+            const runtimeToken = process.env['ACTIONS_RUNTIME_TOKEN']
+            const runId = process.env['GITHUB_RUN_ID']
+            console.log(runtimeUrl)
+            console.log(runtimeToken)
+
+            const artifactsUrl = `${runtimeUrl}_apis/pipelines/workflows/${runId}/artifacts?api-version=${this.apiVersion}`
+
+            const result = await request({
+              method: "GET",
+              url: artifactsUrl,
+              headers: {
+                authorization: `token ${runtimeToken}`,
+                accept: `application/json;api-version=${apiVersion}`
+              },
+              org: "octokit",
+              type: "private",
+            })
+            const result = await github.request(artifactsUrl)
+            
+            console.log(result)
+
+            return { url: runtimeUrl, token: runtimeToken }
 
       - name: Get result
         run: |
