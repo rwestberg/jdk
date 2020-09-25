@@ -103,9 +103,9 @@ jobs:
 
       - name: Display current artifacts
         run: >
-          curl -s -H 'Accept: application/json;api-version=6.0-preview' 
+          curl -s -H 'Accept: application/json;api-version=6.0' 
           -H 'Authorization: Bearer ${{ fromJson(steps.artifacts_endpoint.outputs.result).token }}' 
-          '${{ fromJson(steps.artifacts_endpoint.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview'
+          '${{ fromJson(steps.artifacts_endpoint.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0'
 
       - name: Display current artifacts 2
         run: >
