@@ -789,9 +789,8 @@ jobs:
   artifacts:
     name: Post-process artifacts
     runs-on: "ubuntu-latest"
-    if: needs.prerequisites.outputs.should_run != 'false'
+    if: always()
     needs:
-      - prerequisites
       - linux_x64_test
       - windows_x64_test
       - macos_x64_test
