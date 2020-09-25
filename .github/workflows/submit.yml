@@ -794,7 +794,7 @@ jobs:
       - linux_x64_test
       - windows_x64_test
       - macos_x64_test
-    
+
     steps:
       - name: Determine current artifacts endpoint
         id: actions_runtime
