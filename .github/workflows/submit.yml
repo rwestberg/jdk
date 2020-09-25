@@ -81,17 +81,10 @@ jobs:
         working-directory: jtreg
         if: steps.check_submit.outputs.should_run != 'false' && steps.jtreg.outputs.cache-hit != 'true'
 
-      - name: Store jtreg for later steps
+      - name: Store jtreg for use by later steps
         uses: actions/upload-artifact@v2
         with:
-          name: jtreg_${{ env.bundleid }}
-          path: ~/jtreg/
-        if: steps.check_submit.outputs.should_run != 'false'
-
-      - name: Store jtreg for later steps v2
-        uses: actions/upload-artifact@v2
-        with:
-          name: jtreg_${{ env.bundleid }}_v2
+          name: transient_jtreg_${{ env.bundleid }}
           path: ~/jtreg/
         if: steps.check_submit.outputs.should_run != 'false'
 
@@ -151,7 +144,7 @@ jobs:
       - name: Restore jtreg artifact
         uses: actions/download-artifact@v2
         with:
-          name: jtreg_${{ env.bundleid }}
+          name: transient_jtreg_${{ env.bundleid }}
           path: ~/jtreg/
 
       - name: Checkout gtest sources
@@ -186,7 +179,7 @@ jobs:
       - name: Persist test bundles
         uses: actions/upload-artifact@v2
         with:
-          name: jdk-linux-x64${{ matrix.artifact }}_${{ env.bundleid }}
+          name: transient_jdk-linux-x64${{ matrix.artifact }}_${{ env.bundleid }}
           path: |
             jdk/build/linux-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin${{ matrix.artifact }}.tar.gz
             jdk/build/linux-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin-tests${{ matrix.artifact }}.tar.gz
@@ -270,13 +263,13 @@ jobs:
       - name: Restore jtreg artifact
         uses: actions/download-artifact@v2
         with:
-          name: jtreg_${{ env.bundleid }}
+          name: transient_jtreg_${{ env.bundleid }}
           path: ~/jtreg/
 
       - name: Restore build artifacts
         uses: actions/download-artifact@v2
         with:
-          name: jdk-linux-x64${{ matrix.artifact }}_${{ env.bundleid }}
+          name: transient_jdk-linux-x64${{ matrix.artifact }}_${{ env.bundleid }}
           path: ~/jdk-linux-x64${{ matrix.artifact }}
 
       - name: Unpack jdk
@@ -392,7 +385,7 @@ jobs:
       - name: Restore jtreg artifact
         uses: actions/download-artifact@v2
         with:
-          name: jtreg_${{ env.bundleid }}
+          name: transient_jtreg_${{ env.bundleid }}
           path: ~/jtreg/
 
       - name: Configure
@@ -421,7 +414,7 @@ jobs:
       - name: Persist test bundles
         uses: actions/upload-artifact@v2
         with:
-          name: jdk-windows-x64${{ matrix.artifact }}_${{ env.bundleid }}
+          name: transient_jdk-windows-x64${{ matrix.artifact }}_${{ env.bundleid }}
           path: |
             jdk/build/windows-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}.zip
             jdk/build/windows-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}.tar.gz
@@ -520,13 +513,13 @@ jobs:
       - name: Restore jtreg artifact
         uses: actions/download-artifact@v2
         with:
-          name: jtreg_${{ env.bundleid }}
+          name: transient_jtreg_${{ env.bundleid }}
           path: ~/jtreg/
 
       - name: Restore build artifacts
         uses: actions/download-artifact@v2
         with:
-          name: jdk-windows-x64${{ matrix.artifact }}_${{ env.bundleid }}
+          name: transient_jdk-windows-x64${{ matrix.artifact }}_${{ env.bundleid }}
           path: ~/jdk-windows-x64${{ matrix.artifact }}
 
       - name: Unpack jdk
@@ -628,7 +621,7 @@ jobs:
       - name: Restore jtreg artifact
         uses: actions/download-artifact@v2
         with:
-          name: jtreg_${{ env.bundleid }}
+          name: transient_jtreg_${{ env.bundleid }}
           path: ~/jtreg/
 
       - name: Checkout gtest sources
@@ -663,7 +656,7 @@ jobs:
       - name: Persist test bundles
         uses: actions/upload-artifact@v2
         with:
-          name: jdk-macos-x64${{ matrix.artifact }}_${{ env.bundleid }}
+          name: transient_jdk-macos-x64${{ matrix.artifact }}_${{ env.bundleid }}
           path: |
             jdk/build/macos-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_osx-x64_bin${{ matrix.artifact }}.tar.gz
             jdk/build/macos-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_osx-x64_bin-tests${{ matrix.artifact }}.tar.gz
@@ -747,13 +740,13 @@ jobs:
       - name: Restore jtreg artifact
         uses: actions/download-artifact@v2
         with:
-          name: jtreg_${{ env.bundleid }}
+          name: transient_jtreg_${{ env.bundleid }}
           path: ~/jtreg/
 
       - name: Restore build artifacts
         uses: actions/download-artifact@v2
         with:
-          name: jdk-macos-x64${{ matrix.artifact }}_${{ env.bundleid }}
+          name: transient_jdk-macos-x64${{ matrix.artifact }}_${{ env.bundleid }}
           path: ~/jdk-macos-x64${{ matrix.artifact }}
 
       - name: Unpack jdk
@@ -800,7 +793,7 @@ jobs:
           path: build/*/test-results
 
   artifacts:
-    name: Post-processing artifacts
+    name: Post-process artifacts
     runs-on: "ubuntu-latest"
     if: always()
     needs:
@@ -821,23 +814,13 @@ jobs:
           -H 'Authorization: Bearer ${{ fromJson(steps.actions_runtime.outputs.result).token }}' 
           '${{ fromJson(steps.actions_runtime.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview'
 
-      - name: Display current artifacts 2
+      - name: Delete transient artifacts
         run: >
           for url in `
           curl -s -H 'Accept: application/json;api-version=6.0-preview' 
           -H 'Authorization: Bearer ${{ fromJson(steps.actions_runtime.outputs.result).token }}' 
           '${{ fromJson(steps.actions_runtime.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview' |
-          jq -r -c '.value | map(select(.name|startswith("jtreg"))) | .[].url'`; do
-          echo url is "${url}";
-          done
-
-      - name: Delete artifacts
-        run: >
-          for url in `
-          curl -s -H 'Accept: application/json;api-version=6.0-preview' 
-          -H 'Authorization: Bearer ${{ fromJson(steps.actions_runtime.outputs.result).token }}' 
-          '${{ fromJson(steps.actions_runtime.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview' |
-          jq -r -c '.value | map(select(.name|startswith("jtreg"))) | .[].url'`; do
+          jq -r -c '.value | map(select(.name|startswith("transient_"))) | .[].url'`; do
           curl -s -H 'Accept: application/json;api-version=6.0-preview'
           -H 'Authorization: Bearer ${{ fromJson(steps.actions_runtime.outputs.result).token }}'
           -X DELETE "${url}";
