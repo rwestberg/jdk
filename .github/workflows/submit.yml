@@ -821,9 +821,24 @@ jobs:
           done
 
       - name: Fetch remaining artifacts (test results)
-      - uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v2
         with:
           path: test-results
+
+      - name: Delete remaining artifacts
+        run: >
+          for url in `
+          curl -s -H 'Accept: application/json;api-version=6.0-preview' 
+          -H 'Authorization: Bearer ${{ fromJson(steps.actions_runtime.outputs.result).token }}' 
+          '${{ fromJson(steps.actions_runtime.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview' |
+          jq -r -c '.value | .[].url'`; do
+          curl -s -H 'Accept: application/json;api-version=6.0-preview'
+          -H 'Authorization: Bearer ${{ fromJson(steps.actions_runtime.outputs.result).token }}'
+          -X DELETE "${url}";
+          done
+
+      - name: Determine unique bundle identifier
+        run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
 
       - name: Upload a combined test results artifact
         uses: actions/upload-artifact@v2
