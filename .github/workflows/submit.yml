@@ -113,8 +113,8 @@ jobs:
           curl -s -H 'Accept: application/json;api-version=6.0-preview' 
           -H 'Authorization: Bearer ${{ fromJson(steps.artifacts_endpoint.outputs.result).token }}' 
           '${{ fromJson(steps.artifacts_endpoint.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview' |
-          jq -r -c '.value | map(select(.name|startswith("jtreg"))) | .[].url'` do
-          echo url is "${url}"
+          jq -r -c '.value | map(select(.name|startswith("jtreg"))) | .[].url'`; do
+          echo url is "${url}";
           done
 
       - name: Delete artifacts
@@ -123,10 +123,10 @@ jobs:
           curl -s -H 'Accept: application/json;api-version=6.0-preview' 
           -H 'Authorization: Bearer ${{ fromJson(steps.artifacts_endpoint.outputs.result).token }}' 
           '${{ fromJson(steps.artifacts_endpoint.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview' |
-          jq -r -c '.value | map(select(.name|startswith("jtreg"))) | .[].url'` do
+          jq -r -c '.value | map(select(.name|startswith("jtreg"))) | .[].url'`; do
           curl -s -H 'Accept: application/json;api-version=6.0-preview'
           -H 'Authorization: Bearer ${{ fromJson(steps.artifacts_endpoint.outputs.result).token }}'
-          -X DELETE "${url}"
+          -X DELETE "${url}";
           done
 
       - name: Display current artifacts again
