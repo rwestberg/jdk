@@ -391,13 +391,13 @@ jobs:
         run: >
           $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
           $env:Path = $env:Path -split ";" -match "C:\\Windows|PowerShell|cygwin" -join ";" ;
-          & bash configure 
+          & bash configure
           --with-conf-name=windows-x64
           ${{ matrix.flags }}
-          --with-version-opt="$env:GITHUB_ACTOR-$env:GITHUB_SHA" 
-          --with-version-build=0 
-          --with-boot-jdk="$HOME/bootjdk/$env:BOOT_JDK_VERSION" 
-          --with-jtreg="$HOME/jtreg" 
+          --with-version-opt="$env:GITHUB_ACTOR-$env:GITHUB_SHA"
+          --with-version-build=0
+          --with-boot-jdk="$HOME/bootjdk/$env:BOOT_JDK_VERSION"
+          --with-jtreg="$HOME/jtreg"
           --with-gtest="$env:GITHUB_WORKSPACE/gtest"
           --with-default-make-target="product-bundles test-bundles"
           --enable-jtreg-failure-handler
@@ -808,15 +808,15 @@ jobs:
 
       - name: Display current artifacts
         run: >
-          curl -s -H 'Accept: application/json;api-version=6.0-preview' 
-          -H 'Authorization: Bearer ${{ fromJson(steps.actions_runtime.outputs.result).token }}' 
+          curl -s -H 'Accept: application/json;api-version=6.0-preview'
+          -H 'Authorization: Bearer ${{ fromJson(steps.actions_runtime.outputs.result).token }}'
           '${{ fromJson(steps.actions_runtime.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview'
 
       - name: Delete transient artifacts
         run: >
           for url in `
-          curl -s -H 'Accept: application/json;api-version=6.0-preview' 
-          -H 'Authorization: Bearer ${{ fromJson(steps.actions_runtime.outputs.result).token }}' 
+          curl -s -H 'Accept: application/json;api-version=6.0-preview'
+          -H 'Authorization: Bearer ${{ fromJson(steps.actions_runtime.outputs.result).token }}'
           '${{ fromJson(steps.actions_runtime.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview' |
           jq -r -c '.value | map(select(.name|startswith("transient_"))) | .[].url'`; do
           curl -s -H 'Accept: application/json;api-version=6.0-preview'
@@ -832,8 +832,8 @@ jobs:
       - name: Delete remaining artifacts
         run: >
           for url in `
-          curl -s -H 'Accept: application/json;api-version=6.0-preview' 
-          -H 'Authorization: Bearer ${{ fromJson(steps.actions_runtime.outputs.result).token }}' 
+          curl -s -H 'Accept: application/json;api-version=6.0-preview'
+          -H 'Authorization: Bearer ${{ fromJson(steps.actions_runtime.outputs.result).token }}'
           '${{ fromJson(steps.actions_runtime.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview' |
           jq -r -c '.value | .[].url'`; do
           curl -s -H 'Accept: application/json;api-version=6.0-preview'
