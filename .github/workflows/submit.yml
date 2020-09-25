@@ -303,11 +303,9 @@ jobs:
 
       - name: Create suitable test log artifact name
         run: echo "::set-env name=logsuffix::`echo ${{ matrix.test }} | sed -e 's!/!_!'g -e 's! !_!'g`"
-        if: ${{ failure() }}
 
-      - name: Persist test logs if any test fails
+      - name: Persist test logs
         uses: actions/upload-artifact@v2
-        if: ${{ failure() }}
         with:
           name: linux-x64${{ matrix.artifact }}_testlogs_${{ env.logsuffix }}
           path: build/*/test-results
@@ -559,11 +557,9 @@ jobs:
 
       - name: Create suitable test log artifact name
         run: echo ("::set-env name=logsuffix::" + ("${{ matrix.test }}" -replace "/", "_" -replace " ", "_"))
-        if: ${{ failure() }}
 
-      - name: Persist test logs if any test fails
+      - name: Persist test logs
         uses: actions/upload-artifact@v2
-        if: ${{ failure() }}
         with:
           name: windows-x64${{ matrix.artifact }}_testlogs_${{ env.logsuffix }}
           path: build/*/test-results
@@ -783,11 +779,9 @@ jobs:
 
       - name: Create suitable test log artifact name
         run: echo "::set-env name=logsuffix::`echo ${{ matrix.test }} | sed -e 's!/!_!'g -e 's! !_!'g`"
-        if: ${{ failure() }}
 
-      - name: Persist test logs if any test fails
+      - name: Persist test logs
         uses: actions/upload-artifact@v2
-        if: ${{ failure() }}
         with:
           name: macos-x64${{ matrix.artifact }}_testlogs_${{ env.logsuffix }}
           path: build/*/test-results
@@ -826,8 +820,28 @@ jobs:
           -X DELETE "${url}";
           done
 
-      - name: Display current artifacts again
+      - name: Fetch remaining artifacts (test results)
+      - uses: actions/download-artifact@v2
+        with:
+          path: test-results
+
+      - name: Delete remaining artifacts
         run: >
+          for url in `
           curl -s -H 'Accept: application/json;api-version=6.0-preview' 
           -H 'Authorization: Bearer ${{ fromJson(steps.actions_runtime.outputs.result).token }}' 
-          '${{ fromJson(steps.actions_runtime.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview'
+          '${{ fromJson(steps.actions_runtime.outputs.result).url }}_apis/pipelines/workflows/${{ github.run_id }}/artifacts?api-version=6.0-preview' |
+          jq -r -c '.value | .[].url'`; do
+          curl -s -H 'Accept: application/json;api-version=6.0-preview'
+          -H 'Authorization: Bearer ${{ fromJson(steps.actions_runtime.outputs.result).token }}'
+          -X DELETE "${url}";
+          done
+
+      - name: Determine unique bundle identifier
+        run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
+
+      - name: Upload a combined test results artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results_${{ env.bundleid }}
+          path: test-results
