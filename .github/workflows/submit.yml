@@ -819,3 +819,14 @@ jobs:
           -H 'Authorization: Bearer ${{ fromJson(steps.actions_runtime.outputs.result).token }}'
           -X DELETE "${url}";
           done
+
+      - name: Fetch remaining artifacts (test results)
+      - uses: actions/download-artifact@v2
+        with:
+          path: test-results
+
+      - name: Upload a combined test results artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results_${{ env.bundleid }}
+          path: test-results
