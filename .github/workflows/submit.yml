@@ -302,6 +302,7 @@ jobs:
           JTREG_KEYWORDS="!headful"
 
       - name: Create suitable test log artifact name
+        if: always()
         run: echo "::set-env name=logsuffix::`echo ${{ matrix.test }} | sed -e 's!/!_!'g -e 's! !_!'g`"
 
       - name: Persist test logs
@@ -558,6 +559,7 @@ jobs:
           JTREG_KEYWORDS="!headful"
 
       - name: Create suitable test log artifact name
+        if: always()
         run: echo ("::set-env name=logsuffix::" + ("${{ matrix.test }}" -replace "/", "_" -replace " ", "_"))
 
       - name: Persist test logs
@@ -782,6 +784,7 @@ jobs:
           JTREG_KEYWORDS="!headful"
 
       - name: Create suitable test log artifact name
+        if: always()
         run: echo "::set-env name=logsuffix::`echo ${{ matrix.test }} | sed -e 's!/!_!'g -e 's! !_!'g`"
 
       - name: Persist test logs
