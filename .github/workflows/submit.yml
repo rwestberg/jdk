@@ -244,7 +244,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}
-          key: bootjdk-${{ runner.os }}-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-$${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_SHA256 }}-v1
+          key: bootjdk-${{ runner.os }}-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_SHA256 }}-v1
 
       - name: Restore jtreg artifact
         uses: actions/download-artifact@v2
