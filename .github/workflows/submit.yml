@@ -129,10 +129,6 @@ jobs:
         with:
           path: jdk
 
-      - name: Break the build
-        run: echo "hello there" > src/hotspot/share/runtime/java.cpp 
-        working-directory: jdk
-
       - name: Restore boot JDK from cache
         id: bootjdk
         uses: actions/cache@v2
@@ -367,10 +363,6 @@ jobs:
         with:
           path: jdk
 
-      - name: Break the build
-        run: echo "hello there" > src/hotspot/share/runtime/java.cpp 
-        working-directory: jdk
-
       - name: Restore boot JDK from cache
         id: bootjdk
         uses: actions/cache@v2
@@ -568,7 +560,7 @@ jobs:
           JTREG_VERBOSE=fail,error,time
           TEST=${{ matrix.suites }}
           TEST_OPTS_JAVA_OPTIONS=
-          JTREG_KEYWORDS="!headful"
+          JTREG_KEYWORDS=""
 
       - name: Create suitable test log artifact name
         if: always()
@@ -615,10 +607,6 @@ jobs:
         uses: actions/checkout@v2
         with:
           path: jdk
-
-      - name: Break the build
-        run: echo "hello there" > src/hotspot/share/runtime/java.cpp 
-        working-directory: jdk
 
       - name: Restore boot JDK from cache
         id: bootjdk
