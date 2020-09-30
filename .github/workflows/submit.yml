@@ -286,6 +286,7 @@ jobs:
           TEST="${{ matrix.suites }}"
           TEST_OPTS_JAVA_OPTIONS=
           JTREG_KEYWORDS="!headful"
+          JTREG="JAVA_OPTIONS=-XX:-CreateCoreDumpOnCrash"
 
       - name: Create suitable test log artifact name
         if: always()
@@ -527,6 +528,7 @@ jobs:
             TEST=${{ matrix.suites }}
             TEST_OPTS_JAVA_OPTIONS=
             JTREG_KEYWORDS=!headful
+            JTREG=JAVA_OPTIONS=-XX:-CreateCoreDumpOnCrash
           " -Wait -NoNewWindow -PassThru ;
           echo ("Exit code: " + $result.ExitCode) ;
           exit $result.ExitCode
@@ -737,7 +739,8 @@ jobs:
           TEST=${{ matrix.suites }}
           TEST_OPTS_JAVA_OPTIONS=
           JTREG_KEYWORDS="!headful"
-
+          JTREG="JAVA_OPTIONS=-XX:-CreateCoreDumpOnCrash"
+          
       - name: Create suitable test log artifact name
         if: always()
         run: echo "::set-env name=logsuffix::`echo ${{ matrix.test }} | sed -e 's!/!_!'g -e 's! !_!'g`"
