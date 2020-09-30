@@ -537,7 +537,7 @@ jobs:
 
       - name: Parse test results
         if: always()
-        run: exit (Get-ChildItem -Path build\*\test-results\test-summary.txt -Recurse | Select-String -Pattern "TEST FAILURE" ).Count
+        run: exit ((Get-ChildItem -Path build\*\test-results\test-summary.txt -Recurse | Select-String -Pattern "TEST SUCCESS").Count -eq 0)
 
       - name: Create suitable test log artifact name
         if: always()
