@@ -378,15 +378,15 @@ jobs:
           $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
           $env:Path = $env:Path -split ";" -match "C:\\Windows|PowerShell|cygwin" -join ";" ;
           & bash configure
-          --with-conf-name=windows-x64
-          ${{ matrix.flags }}
-          --with-version-opt="$env:GITHUB_ACTOR-$env:GITHUB_SHA"
-          --with-version-build=0
-          --with-boot-jdk="$HOME/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
-          --with-jtreg="$HOME/jtreg"
-          --with-gtest="$env:GITHUB_WORKSPACE/gtest"
-          --with-default-make-target="product-bundles test-bundles"
-          --enable-jtreg-failure-handler
+            --with-conf-name=windows-x64
+            ${{ matrix.flags }}
+            --with-version-opt="$env:GITHUB_ACTOR-$env:GITHUB_SHA"
+            --with-version-build=0
+            --with-boot-jdk="$HOME/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
+            --with-jtreg="$HOME/jtreg"
+            --with-gtest="$env:GITHUB_WORKSPACE/gtest"
+            --with-default-make-target="product-bundles test-bundles"
+            --enable-jtreg-failure-handler
         working-directory: jdk
 
       - name: Build
@@ -394,6 +394,7 @@ jobs:
           $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
           $env:Path = $env:Path -split ";" -match "C:\\Windows|PowerShell|cygwin" -join ";" ;
           $result = Start-Process -FilePath make -ArgumentList "CONF_NAME=windows-x64 ${{ matrix.build-target }}" -Wait -NoNewWindow -PassThru ;
+          echo ("Exit code: " + $result.ExitCode) ;
           exit $result.ExitCode
         working-directory: jdk
 
@@ -527,6 +528,7 @@ jobs:
             TEST_OPTS_JAVA_OPTIONS=
             JTREG_KEYWORDS=!headful
           " -Wait -NoNewWindow -PassThru ;
+          echo ("Exit code: " + $result.ExitCode) ;
           exit $result.ExitCode
 
       - name: Create suitable test log artifact name
