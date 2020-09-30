@@ -526,7 +526,7 @@ jobs:
             TEST=${{ matrix.suites }}
             TEST_OPTS_JAVA_OPTIONS=
             JTREG_KEYWORDS=!headful
-          " ;
+          " -Wait -NoNewWindow -PassThru ;
           exit $result.ExitCode
 
       - name: Create suitable test log artifact name
