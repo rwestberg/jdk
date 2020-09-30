@@ -114,8 +114,6 @@ jobs:
             build-target: hotspot
 
     env:
-      JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
-      BOOT_JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).BOOT_JDK_VERSION }}"
       BOOT_JDK_FILENAME: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_FILENAME }}"
       BOOT_JDK_URL: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_URL }}"
       BOOT_JDK_SHA256: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_SHA256 }}"
@@ -133,16 +131,16 @@ jobs:
         id: bootjdk
         uses: actions/cache@v2
         with:
-          path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-${{ env.BOOT_JDK_SHA256 }}-v1
+          path: ~/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}
+          key: bootjdk-${{ runner.os }}-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-${{ env.BOOT_JDK_SHA256 }}-v1
 
       - name: Download boot JDK
         run: |
-          mkdir -p "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
+          mkdir -p "${HOME}/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
           wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
           echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
-          tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
-          mv "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"*/* "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"
+          tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
+          mv "${HOME}/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}/"*/* "${HOME}/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}/"
         if: steps.bootjdk.outputs.cache-hit != 'true'
 
       - name: Restore jtreg artifact
@@ -168,7 +166,7 @@ jobs:
           ${{ matrix.flags }}
           --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA}
           --with-version-build=0
-          --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}
+          --with-boot-jdk=${HOME}/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}
           --with-jtreg=${HOME}/jtreg
           --with-gtest=${GITHUB_WORKSPACE}/gtest
           --with-default-make-target="product-bundles test-bundles"
@@ -185,8 +183,8 @@ jobs:
         with:
           name: transient_jdk-linux-x64${{ matrix.artifact }}_${{ env.bundleid }}
           path: |
-            jdk/build/linux-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin${{ matrix.artifact }}.tar.gz
-            jdk/build/linux-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin-tests${{ matrix.artifact }}.tar.gz
+            jdk/build/linux-x64/bundles/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_linux-x64_bin${{ matrix.artifact }}.tar.gz
+            jdk/build/linux-x64/bundles/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_linux-x64_bin-tests${{ matrix.artifact }}.tar.gz
         if: matrix.build-target == false
 
   linux_x64_test:
@@ -234,13 +232,6 @@ jobs:
             suites: test/hotspot/jtreg/:tier1_serviceability
             artifact: -debug
 
-    env:
-      JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
-      BOOT_JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).BOOT_JDK_VERSION }}"
-      BOOT_JDK_FILENAME: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_FILENAME }}"
-      BOOT_JDK_URL: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_URL }}"
-      BOOT_JDK_SHA256: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_SHA256 }}"
-
     steps:
       - name: Determine unique bundle identifier
         run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
@@ -252,17 +243,8 @@ jobs:
         id: bootjdk
         uses: actions/cache@v2
         with:
-          path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-${{ env.BOOT_JDK_SHA256 }}-v1
-
-      - name: Download boot JDK
-        run: |
-          mkdir -p "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
-          wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
-          echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
-          tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
-          mv "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"*/* "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"
-        if: steps.bootjdk.outputs.cache-hit != 'true'
+          path: ~/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}
+          key: bootjdk-${{ runner.os }}-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_SHA256 }}-v1
 
       - name: Restore jtreg artifact
         uses: actions/download-artifact@v2
@@ -278,24 +260,24 @@ jobs:
 
       - name: Unpack jdk
         run: |
-          mkdir -p "${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin${{ matrix.artifact }}"
-          tar -xf "${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin${{ matrix.artifact }}.tar.gz" -C "${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin${{ matrix.artifact }}"
+          mkdir -p "${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_linux-x64_bin${{ matrix.artifact }}"
+          tar -xf "${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_linux-x64_bin${{ matrix.artifact }}.tar.gz" -C "${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_linux-x64_bin${{ matrix.artifact }}"
 
       - name: Unpack tests
         run: |
-          mkdir -p "${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin-tests${{ matrix.artifact }}"
-          tar -xf "${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin-tests${{ matrix.artifact }}.tar.gz" -C "${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin-tests${{ matrix.artifact }}"
+          mkdir -p "${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_linux-x64_bin-tests${{ matrix.artifact }}"
+          tar -xf "${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_linux-x64_bin-tests${{ matrix.artifact }}.tar.gz" -C "${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_linux-x64_bin-tests${{ matrix.artifact }}"
 
       - name: Find root of jdk image dir
         run: |
-          imageroot=`find ${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin${{ matrix.artifact }} -name release -type f`
+          imageroot=`find ${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_linux-x64_bin${{ matrix.artifact }} -name release -type f`
           echo "::set-env name=imageroot::`dirname ${imageroot}`"
 
       - name: Run tests
         run: >
           JDK_IMAGE_DIR=${{ env.imageroot }}
-          TEST_IMAGE_DIR=${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin-tests${{ matrix.artifact }}
-          BOOT_JDK=${HOME}/bootjdk/${BOOT_JDK_VERSION}
+          TEST_IMAGE_DIR=${HOME}/jdk-linux-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_linux-x64_bin-tests${{ matrix.artifact }}
+          BOOT_JDK=${HOME}/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}
           JT_HOME=${HOME}/jtreg
           make test-prebuilt
           CONF_NAME=run-test-prebuilt
@@ -335,8 +317,6 @@ jobs:
             artifact: -debug
 
     env:
-      JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
-      BOOT_JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).BOOT_JDK_VERSION }}"
       BOOT_JDK_FILENAME: "${{ fromJson(needs.prerequisites.outputs.dependencies).WINDOWS_X64_BOOT_JDK_FILENAME }}"
       BOOT_JDK_URL: "${{ fromJson(needs.prerequisites.outputs.dependencies).WINDOWS_X64_BOOT_JDK_URL }}"
       BOOT_JDK_SHA256: "${{ fromJson(needs.prerequisites.outputs.dependencies).WINDOWS_X64_BOOT_JDK_SHA256 }}"
@@ -367,17 +347,17 @@ jobs:
         id: bootjdk
         uses: actions/cache@v2
         with:
-          path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-${{ env.BOOT_JDK_SHA256 }}-v1
+          path: ~/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}
+          key: bootjdk-${{ runner.os }}-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-${{ env.BOOT_JDK_SHA256 }}-v1
 
       - name: Download boot JDK
         run: |
-          mkdir -p "$HOME\bootjdk\$env:BOOT_JDK_VERSION"
+          mkdir -p "$HOME\bootjdk\${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
           & curl -L "$env:BOOT_JDK_URL" -o "$HOME/bootjdk/$env:BOOT_JDK_FILENAME"
           $FileHash = Get-FileHash -Algorithm SHA256 "$HOME/bootjdk/$env:BOOT_JDK_FILENAME"
           $FileHash.Hash -eq $env:BOOT_JDK_SHA256
-          & tar -xf "$HOME/bootjdk/$env:BOOT_JDK_FILENAME" -C "$HOME/bootjdk/$env:BOOT_JDK_VERSION"
-          Get-ChildItem "$HOME\bootjdk\$env:BOOT_JDK_VERSION\*\*" | Move-Item -Destination "$HOME\bootjdk\$env:BOOT_JDK_VERSION"
+          & tar -xf "$HOME/bootjdk/$env:BOOT_JDK_FILENAME" -C "$HOME/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
+          Get-ChildItem "$HOME\bootjdk\${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}\*\*" | Move-Item -Destination "$HOME\bootjdk\${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
         if: steps.bootjdk.outputs.cache-hit != 'true'
 
       - name: Checkout gtest sources
@@ -402,7 +382,7 @@ jobs:
           ${{ matrix.flags }}
           --with-version-opt="$env:GITHUB_ACTOR-$env:GITHUB_SHA"
           --with-version-build=0
-          --with-boot-jdk="$HOME/bootjdk/$env:BOOT_JDK_VERSION"
+          --with-boot-jdk="$HOME/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
           --with-jtreg="$HOME/jtreg"
           --with-gtest="$env:GITHUB_WORKSPACE/gtest"
           --with-default-make-target="product-bundles test-bundles"
@@ -413,7 +393,8 @@ jobs:
         run: |
           $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
           $env:Path = $env:Path -split ";" -match "C:\\Windows|PowerShell|cygwin" -join ";" ;
-          & make CONF_NAME=windows-x64 ${{ matrix.build-target }}
+          $result = Start-Process -FilePath make -ArgumentList "CONF_NAME=windows-x64 ${{ matrix.build-target }}" -Wait -NoNewWindow -PassThru ;
+          exit $result.ExitCode
         working-directory: jdk
 
       - name: Persist test bundles
@@ -421,9 +402,9 @@ jobs:
         with:
           name: transient_jdk-windows-x64${{ matrix.artifact }}_${{ env.bundleid }}
           path: |
-            jdk/build/windows-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}.zip
-            jdk/build/windows-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}.tar.gz
-            jdk/build/windows-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols.tar.gz
+            jdk/build/windows-x64/bundles/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_windows-x64_bin${{ matrix.artifact }}.zip
+            jdk/build/windows-x64/bundles/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}.tar.gz
+            jdk/build/windows-x64/bundles/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols.tar.gz
         if: matrix.build-target == false
 
   windows_x64_test:
@@ -471,13 +452,6 @@ jobs:
             suites: test/hotspot/jtreg/:tier1_serviceability
             artifact: -debug
 
-    env:
-      JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
-      BOOT_JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).BOOT_JDK_VERSION }}"
-      BOOT_JDK_FILENAME: "${{ fromJson(needs.prerequisites.outputs.dependencies).WINDOWS_X64_BOOT_JDK_FILENAME }}"
-      BOOT_JDK_URL: "${{ fromJson(needs.prerequisites.outputs.dependencies).WINDOWS_X64_BOOT_JDK_URL }}"
-      BOOT_JDK_SHA256: "${{ fromJson(needs.prerequisites.outputs.dependencies).WINDOWS_X64_BOOT_JDK_SHA256 }}"
-
     steps:
       - name: Determine unique bundle identifier
         run: echo ("::set-env name=bundleid::$env:GITHUB_ACTOR" + "_" + (-join "$env:GITHUB_SHA"[0..7]))
@@ -489,18 +463,8 @@ jobs:
         id: bootjdk
         uses: actions/cache@v2
         with:
-          path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-${{ env.BOOT_JDK_SHA256 }}-v1
-
-      - name: Download boot JDK
-        run: |
-          mkdir -p "$HOME\bootjdk\$env:BOOT_JDK_VERSION"
-          & curl -L "$env:BOOT_JDK_URL" -o "$HOME/bootjdk/$env:BOOT_JDK_FILENAME"
-          $FileHash = Get-FileHash -Algorithm SHA256 "$HOME/bootjdk/$env:BOOT_JDK_FILENAME"
-          $FileHash.Hash -eq $env:BOOT_JDK_SHA256
-          & tar -xf "$HOME/bootjdk/$env:BOOT_JDK_FILENAME" -C "$HOME/bootjdk/$env:BOOT_JDK_VERSION"
-          Get-ChildItem "$HOME\bootjdk\$env:BOOT_JDK_VERSION\*\*" | Move-Item -Destination "$HOME\bootjdk\$env:BOOT_JDK_VERSION"
-        if: steps.bootjdk.outputs.cache-hit != 'true'
+          path: ~/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}
+          key: bootjdk-${{ runner.os }}-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-${{ fromJson(needs.prerequisites.outputs.dependencies).WINDOWS_X64_BOOT_JDK_SHA256 }}-v1
 
       - name: Restore cygwin packages from cache
         id: cygwin
@@ -529,21 +493,21 @@ jobs:
 
       - name: Unpack jdk
         run: |
-          mkdir -p "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}"
-          tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}.zip" -C "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}"
+          mkdir -p "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_windows-x64_bin${{ matrix.artifact }}"
+          tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_windows-x64_bin${{ matrix.artifact }}.zip" -C "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_windows-x64_bin${{ matrix.artifact }}"
 
       - name: Unpack symbols
         run: |
-          mkdir -p "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols"
-          tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols.tar.gz" -C "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols"
+          mkdir -p "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols"
+          tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols.tar.gz" -C "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols"
 
       - name: Unpack tests
         run: |
-          mkdir -p "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}"
-          tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}.tar.gz" -C "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}"
+          mkdir -p "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}"
+          tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}.tar.gz" -C "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}"
 
       - name: Find root of jdk image dir
-        run: echo ("::set-env name=imageroot::" + (Get-ChildItem -Path $HOME/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }} -Filter release -Recurse -ErrorAction SilentlyContinue -Force).DirectoryName)
+        run: echo ("::set-env name=imageroot::" + (Get-ChildItem -Path $HOME/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_windows-x64_bin${{ matrix.artifact }} -Filter release -Recurse -ErrorAction SilentlyContinue -Force).DirectoryName)
 
       - name: Run tests
         run: >
@@ -551,16 +515,19 @@ jobs:
           $env:Path = $env:Path -split ";" -match "C:\\Windows|PowerShell|cygwin" -join ";" ;
           $env:JDK_IMAGE_DIR = cygpath "${{ env.imageroot }}" ;
           $env:SYMBOLS_IMAGE_DIR = cygpath "${{ env.imageroot }}" ;
-          $env:TEST_IMAGE_DIR = cygpath "$HOME/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}" ;
-          $env:BOOT_JDK = cygpath "$HOME/bootjdk/$env:BOOT_JDK_VERSION" ;
+          $env:TEST_IMAGE_DIR = cygpath "$HOME/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}" ;
+          $env:BOOT_JDK = cygpath "$HOME/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}" ;
           $env:JT_HOME = cygpath "$HOME/jtreg" ;
-          & make test-prebuilt
-          CONF_NAME=run-test-prebuilt
-          LOG_CMDLINES=true
-          JTREG_VERBOSE=fail,error,time
-          TEST=${{ matrix.suites }}
-          TEST_OPTS_JAVA_OPTIONS=
-          JTREG_KEYWORDS="!headful"
+          $result = Start-Process -FilePath make -ArgumentList "
+            test-prebuilt
+            CONF_NAME=run-test-prebuilt
+            LOG_CMDLINES=true
+            JTREG_VERBOSE=fail,error,time
+            TEST=${{ matrix.suites }}
+            TEST_OPTS_JAVA_OPTIONS=
+            JTREG_KEYWORDS=!headful
+          " ;
+          exit $result.ExitCode
 
       - name: Create suitable test log artifact name
         if: always()
@@ -593,8 +560,6 @@ jobs:
             artifact: -debug
 
     env:
-      JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
-      BOOT_JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).BOOT_JDK_VERSION }}"
       BOOT_JDK_FILENAME: "${{ fromJson(needs.prerequisites.outputs.dependencies).MACOS_X64_BOOT_JDK_FILENAME }}"
       BOOT_JDK_URL: "${{ fromJson(needs.prerequisites.outputs.dependencies).MACOS_X64_BOOT_JDK_URL }}"
       BOOT_JDK_SHA256: "${{ fromJson(needs.prerequisites.outputs.dependencies).MACOS_X64_BOOT_JDK_SHA256 }}"
@@ -612,16 +577,16 @@ jobs:
         id: bootjdk
         uses: actions/cache@v2
         with:
-          path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-${{ env.BOOT_JDK_SHA256 }}-v1
+          path: ~/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}
+          key: bootjdk-${{ runner.os }}-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-${{ env.BOOT_JDK_SHA256 }}-v1
 
       - name: Download boot JDK
         run: |
-          mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION} || true
+          mkdir -p ${HOME}/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }} || true
           wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
           echo "${BOOT_JDK_SHA256}  ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | shasum -a 256 -c >/dev/null -
-          tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
-          mv "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"*/* "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"
+          tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
+          mv "${HOME}/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}/"*/* "${HOME}/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}/"
         if: steps.bootjdk.outputs.cache-hit != 'true'
 
       - name: Restore jtreg artifact
@@ -647,7 +612,7 @@ jobs:
           ${{ matrix.flags }}
           --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA}
           --with-version-build=0
-          --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}/Contents/Home
+          --with-boot-jdk=${HOME}/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}/Contents/Home
           --with-jtreg=${HOME}/jtreg
           --with-gtest=${GITHUB_WORKSPACE}/gtest
           --with-default-make-target="product-bundles test-bundles"
@@ -664,8 +629,8 @@ jobs:
         with:
           name: transient_jdk-macos-x64${{ matrix.artifact }}_${{ env.bundleid }}
           path: |
-            jdk/build/macos-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_osx-x64_bin${{ matrix.artifact }}.tar.gz
-            jdk/build/macos-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_osx-x64_bin-tests${{ matrix.artifact }}.tar.gz
+            jdk/build/macos-x64/bundles/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_osx-x64_bin${{ matrix.artifact }}.tar.gz
+            jdk/build/macos-x64/bundles/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_osx-x64_bin-tests${{ matrix.artifact }}.tar.gz
         if: matrix.build-target == false
 
   macos_x64_test:
@@ -713,13 +678,6 @@ jobs:
             suites: test/hotspot/jtreg/:tier1_serviceability
             artifact: -debug
 
-    env:
-      JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
-      BOOT_JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).BOOT_JDK_VERSION }}"
-      BOOT_JDK_FILENAME: "${{ fromJson(needs.prerequisites.outputs.dependencies).MACOS_X64_BOOT_JDK_FILENAME }}"
-      BOOT_JDK_URL: "${{ fromJson(needs.prerequisites.outputs.dependencies).MACOS_X64_BOOT_JDK_URL }}"
-      BOOT_JDK_SHA256: "${{ fromJson(needs.prerequisites.outputs.dependencies).MACOS_X64_BOOT_JDK_SHA256 }}"
-
     steps:
       - name: Determine unique bundle identifier
         run: echo "::set-env name=bundleid::${GITHUB_ACTOR}_${GITHUB_SHA:0:8}"
@@ -731,17 +689,8 @@ jobs:
         id: bootjdk
         uses: actions/cache@v2
         with:
-          path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-${{ env.BOOT_JDK_SHA256 }}-v1
-
-      - name: Download boot JDK
-        run: |
-          mkdir -p ${HOME}/bootjdk/${BOOT_JDK_VERSION} || true
-          wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
-          echo "${BOOT_JDK_SHA256}  ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | shasum -a 256 -c >/dev/null -
-          tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
-          mv "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"*/* "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"
-        if: steps.bootjdk.outputs.cache-hit != 'true'
+          path: ~/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}
+          key: bootjdk-${{ runner.os }}-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-${{ fromJson(needs.prerequisites.outputs.dependencies).MACOS_X64_BOOT_JDK_SHA256 }}-v1
 
       - name: Restore jtreg artifact
         uses: actions/download-artifact@v2
@@ -757,27 +706,27 @@ jobs:
 
       - name: Unpack jdk
         run: |
-          mkdir -p "${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_osx-x64_bin${{ matrix.artifact }}"
-          tar -xf "${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_osx-x64_bin${{ matrix.artifact }}.tar.gz" -C "${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_osx-x64_bin${{ matrix.artifact }}"
+          mkdir -p "${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_osx-x64_bin${{ matrix.artifact }}"
+          tar -xf "${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_osx-x64_bin${{ matrix.artifact }}.tar.gz" -C "${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_osx-x64_bin${{ matrix.artifact }}"
 
       - name: Unpack tests
         run: |
-          mkdir -p "${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_osx-x64_bin-tests${{ matrix.artifact }}"
-          tar -xf "${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_osx-x64_bin-tests${{ matrix.artifact }}.tar.gz" -C "${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_osx-x64_bin-tests${{ matrix.artifact }}"
+          mkdir -p "${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_osx-x64_bin-tests${{ matrix.artifact }}"
+          tar -xf "${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_osx-x64_bin-tests${{ matrix.artifact }}.tar.gz" -C "${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_osx-x64_bin-tests${{ matrix.artifact }}"
 
       - name: Install dependencies
         run: brew install make
 
       - name: Find root of jdk image dir
         run: |
-          imageroot=`find ${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_osx-x64_bin${{ matrix.artifact }} -name release -type f`
+          imageroot=`find ${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_osx-x64_bin${{ matrix.artifact }} -name release -type f`
           echo "::set-env name=imageroot::`dirname ${imageroot}`"
 
       - name: Run tests
         run: >
           JDK_IMAGE_DIR=${{ env.imageroot }}
-          TEST_IMAGE_DIR=${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_osx-x64_bin-tests${{ matrix.artifact }}
-          BOOT_JDK=${HOME}/bootjdk/${BOOT_JDK_VERSION}/Contents/Home
+          TEST_IMAGE_DIR=${HOME}/jdk-macos-x64${{ matrix.artifact }}/jdk-${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}-internal+0_osx-x64_bin-tests${{ matrix.artifact }}
+          BOOT_JDK=${HOME}/bootjdk/${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}/Contents/Home
           JT_HOME=${HOME}/jtreg
           gmake test-prebuilt
           CONF_NAME=run-test-prebuilt
