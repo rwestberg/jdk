@@ -290,7 +290,11 @@ jobs:
 
       - name: Parse test results
         if: always()
-        run: grep --include=test-summary.txt -r build/*/test-results -e "TEST SUCCESS"
+        run: >
+          if ! grep --include=test-summary.txt -lqr build/*/test-results -e "TEST SUCCESS" ; then
+            cat build/*/test-results/*/text/newfailures.txt ;
+            exit 1 ;
+          fi
 
       - name: Create suitable test log artifact name
         if: always()
@@ -537,7 +541,11 @@ jobs:
 
       - name: Parse test results
         if: always()
-        run: exit ((Get-ChildItem -Path build\*\test-results\test-summary.txt -Recurse | Select-String -Pattern "TEST SUCCESS").Count -eq 0)
+        run: >
+          if ((Get-ChildItem -Path build\*\test-results\test-summary.txt -Recurse | Select-String -Pattern "TEST SUCCESS" ).Count -eq 0) { 
+            Get-Content -Path build\*\test-results\*\*\newfailures.txt ;
+            exit 1
+          }
 
       - name: Create suitable test log artifact name
         if: always()
@@ -749,7 +757,11 @@ jobs:
 
       - name: Parse test results
         if: always()
-        run: grep --include=test-summary.txt -r build/*/test-results -e "TEST SUCCESS"
+        run: >
+          if ! grep --include=test-summary.txt -lqr build/*/test-results -e "TEST SUCCESS" ; then
+            cat build/*/test-results/*/text/newfailures.txt ;
+            exit 1 ;
+          fi
 
       - name: Create suitable test log artifact name
         if: always()
