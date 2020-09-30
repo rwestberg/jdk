@@ -147,7 +147,7 @@ jobs:
         id: jtreg_restore
         uses: actions/download-artifact@v2
         with:
-          name: transient_jtreg_${{ env.bundleid }}_ohnoes
+          name: transient_jtreg_${{ env.bundleid }}
           path: ~/jtreg/
         continue-on-error: true
 
