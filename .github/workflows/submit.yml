@@ -144,10 +144,19 @@ jobs:
         if: steps.bootjdk.outputs.cache-hit != 'true'
 
       - name: Restore jtreg artifact
+        id: jtreg_restore
+        uses: actions/download-artifact@v2
+        with:
+          name: transient_jtreg_${{ env.bundleid }}_ohnoes
+          path: ~/jtreg/
+        continue-on-error: true
+
+      - name: Restore jtreg artifact (retry)
         uses: actions/download-artifact@v2
         with:
           name: transient_jtreg_${{ env.bundleid }}
           path: ~/jtreg/
+        if: steps.jtreg_restore.outcome == 'failure'
 
       - name: Checkout gtest sources
         uses: actions/checkout@v2
