@@ -286,7 +286,11 @@ jobs:
           TEST="${{ matrix.suites }}"
           TEST_OPTS_JAVA_OPTIONS=
           JTREG_KEYWORDS="!headful"
-          JTREG="JAVA_OPTIONS=-XX:-CreateCoreDumpOnCrash"
+          JTREG="JAVA_OPTIONS=-XX:-CreateCoredumpOnCrash"
+
+      - name: Parse test results
+        if: always()
+        run: grep --include=test-summary.txt -r build/*/test-results -e "TEST SUCCESS"
 
       - name: Create suitable test log artifact name
         if: always()
@@ -528,10 +532,12 @@ jobs:
             TEST=${{ matrix.suites }}
             TEST_OPTS_JAVA_OPTIONS=
             JTREG_KEYWORDS=!headful
-            JTREG=JAVA_OPTIONS=-XX:-CreateCoreDumpOnCrash
-          " -Wait -NoNewWindow -PassThru ;
-          echo ("Exit code: " + $result.ExitCode) ;
-          exit $result.ExitCode
+            JTREG=JAVA_OPTIONS=-XX:-CreateCoredumpOnCrash
+          " -Wait -NoNewWindow -PassThru
+
+      - name: Parse test results
+        if: always()
+        run: exit (Get-ChildItem -Path build\*\test-results\test-summary.txt -Recurse | Select-String -Pattern "TEST FAILURE" ).Count
 
       - name: Create suitable test log artifact name
         if: always()
@@ -739,8 +745,12 @@ jobs:
           TEST=${{ matrix.suites }}
           TEST_OPTS_JAVA_OPTIONS=
           JTREG_KEYWORDS="!headful"
-          JTREG="JAVA_OPTIONS=-XX:-CreateCoreDumpOnCrash"
-          
+          JTREG="JAVA_OPTIONS=-XX:-CreateCoredumpOnCrash"
+
+      - name: Parse test results
+        if: always()
+        run: grep --include=test-summary.txt -r build/*/test-results -e "TEST SUCCESS"
+
       - name: Create suitable test log artifact name
         if: always()
         run: echo "::set-env name=logsuffix::`echo ${{ matrix.test }} | sed -e 's!/!_!'g -e 's! !_!'g`"
