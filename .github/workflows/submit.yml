@@ -386,10 +386,14 @@ jobs:
           & curl -L "https://www.cygwin.com/setup-x86_64.exe" -o "$HOME/cygwin/setup-x86_64.exe"
           Start-Process -FilePath "$HOME\cygwin\setup-x86_64.exe" -ArgumentList "--quiet-mode --packages autoconf,make,zip,unzip --root $HOME\cygwin\cygwin64 --local-package-dir $HOME\cygwin\packages --site http://mirrors.kernel.org/sourceware/cygwin --no-desktop --no-shortcuts --no-startmenu --no-admin" -Wait -NoNewWindow
 
+      - name: Setup short path substitution
+        run: "subst t: {{ env.HOME }}"
+        shell: cmd
+
       - name: Checkout the source
         uses: actions/checkout@v2
         with:
-          path: jdk
+          path: t:\jdk
 
       - name: Restore boot JDK from cache
         id: bootjdk
@@ -444,14 +448,14 @@ jobs:
           --with-gtest="$env:GITHUB_WORKSPACE/gtest"
           --with-default-make-target="product-bundles test-bundles"
           --enable-jtreg-failure-handler
-        working-directory: jdk
+        working-directory: t:\jdk
 
       - name: Build
         run: |
           $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
           $env:Path = $env:Path -split ";" -match "C:\\Windows|PowerShell|cygwin" -join ";" ;
           & make CONF_NAME=windows-x64 ${{ matrix.build-target }}
-        working-directory: jdk
+        working-directory: t:\jdk
 
       - name: Persist test bundles
         uses: actions/upload-artifact@v2
@@ -579,24 +583,20 @@ jobs:
           path: ~/jdk-windows-x64${{ matrix.artifact }}
         if: steps.build_restore.outcome == 'failure'
 
-      - name: Create a short path
-        run: "subst t: %HOME%"
-        shell: cmd
-
       - name: Unpack jdk
         run: |
-          mkdir -p "T:/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}"
-          tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}.zip" -C "T:/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}"
+          mkdir -p "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}"
+          tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}.zip" -C "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}"
 
       - name: Unpack symbols
         run: |
-          mkdir -p "T:/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols"
-          tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols.tar.gz" -C "T:/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols"
+          mkdir -p "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols"
+          tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols.tar.gz" -C "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols"
 
       - name: Unpack tests
         run: |
-          mkdir -p "T:/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}"
-          tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}.tar.gz" -C "T:/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}"
+          mkdir -p "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}"
+          tar -xf "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}.tar.gz" -C "${HOME}/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}"
 
       - name: Find root of jdk image dir
         run: echo ("imageroot=" + (Get-ChildItem -Path $HOME/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }} -Filter release -Recurse -ErrorAction SilentlyContinue -Force).DirectoryName) | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
@@ -607,7 +607,7 @@ jobs:
           $env:Path = $env:Path -split ";" -match "C:\\Windows|PowerShell|cygwin" -join ";" ;
           $env:JDK_IMAGE_DIR = cygpath "${{ env.imageroot }}" ;
           $env:SYMBOLS_IMAGE_DIR = cygpath "${{ env.imageroot }}" ;
-          $env:TEST_IMAGE_DIR = cygpath "T:/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}" ;
+          $env:TEST_IMAGE_DIR = cygpath "$HOME/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}" ;
           $env:BOOT_JDK = cygpath "$HOME/bootjdk/$env:BOOT_JDK_VERSION" ;
           $env:JT_HOME = cygpath "$HOME/jtreg" ;
           & make test-prebuilt
