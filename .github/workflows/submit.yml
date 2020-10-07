@@ -601,6 +601,10 @@ jobs:
       - name: Find root of jdk image dir
         run: echo ("imageroot=" + (Get-ChildItem -Path $HOME/jdk-windows-x64${{ matrix.artifact }}/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }} -Filter release -Recurse -ErrorAction SilentlyContinue -Force).DirectoryName) | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8
 
+      - name: Setup short path substitution
+        run: "subst t: ${{ github.workspace }}"
+        shell: cmd
+
       - name: Run tests
         run: >
           $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
@@ -618,6 +622,7 @@ jobs:
           TEST_OPTS_JAVA_OPTIONS=
           JTREG_KEYWORDS="!headful"
           JTREG="JAVA_OPTIONS=-XX:-CreateCoredumpOnCrash"
+        working-directory: t:\jdk
 
       - name: Check that all tests executed successfully
         if: always()
