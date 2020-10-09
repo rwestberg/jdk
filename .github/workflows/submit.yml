@@ -112,7 +112,7 @@ jobs:
               sudo apt-get install g++-aarch64-linux-gnu gcc-aarch64-linux-gnu debootstrap && 
               sudo debootstrap --arch=arm64 --verbose
               --include=fakeroot,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng12-dev
-              --resolve-deps bionic /chroots/arm64 http://azure.archive.ubuntu.com/ubuntu
+              --resolve-deps jessie /chroots/arm64 http://debian-archive.trafficmanager.net/debian/
 
     env:
       JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
