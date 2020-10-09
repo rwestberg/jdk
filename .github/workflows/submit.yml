@@ -111,7 +111,7 @@ jobs:
             deps: >
               sudo apt-get install g++-aarch64-linux-gnu gcc-aarch64-linux-gnu debootstrap qemu-user-static && 
               sudo qemu-debootstrap --arch=arm64 --verbose
-              --include=fakeroot,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng12-dev
+              --include=fakeroot,build-essential,libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
               --resolve-deps bionic /chroots/arm64
 
     env:
