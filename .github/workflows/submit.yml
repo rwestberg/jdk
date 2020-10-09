@@ -105,18 +105,6 @@ jobs:
         flavor:
           - build hotspot aarch64
         include:
-          - flavor: build debug
-            flags: --enable-debug
-            artifact: -debug
-          - flavor: build hotspot no-pch
-            flags: --enable-debug --disable-precompiled-headers
-            build-target: hotspot
-          - flavor: build hotspot zero
-            flags: --enable-debug --disable-precompiled-headers --with-jvm-variants=zero
-            build-target: hotspot
-          - flavor: build hotspot minimal
-            flags: --enable-debug --disable-precompiled-headers --with-jvm-variants=minimal
-            build-target: hotspot
           - flavor: build hotspot aarch64
             cc: CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++
             flags: --enable-debug --disable-precompiled-headers --openjdk-target=aarch64-linux-gnu --with-sysroot=/chroots/arm64/ --with-toolchain-path=/chroots/arm64/
