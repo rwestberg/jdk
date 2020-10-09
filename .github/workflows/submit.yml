@@ -103,11 +103,6 @@ jobs:
       fail-fast: false
       matrix:
         flavor:
-          - build release
-          - build debug
-          - build hotspot no-pch
-          - build hotspot zero
-          - build hotspot minimal
           - build hotspot aarch64
         include:
           - flavor: build debug
@@ -126,10 +121,10 @@ jobs:
             cc: CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++
             flags: --enable-debug --disable-precompiled-headers --openjdk-target=aarch64-linux-gnu --with-sysroot=/chroots/arm64/ --with-toolchain-path=/chroots/arm64/
             deps: >
-              apt install g++-aarch64-linux-gnu gcc-aarch64-linux-gnu && 
-              sudo qemu-debootstrap --arch=arm64 --verbose
+              sudo apt-get install g++-aarch64-linux-gnu gcc-aarch64-linux-gnu && 
+              sudo debootstrap --arch=arm64 --verbose
                 --include=fakeroot,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng12-dev
-                --resolve-deps jessie /chroots/arm64 http://httpredir.debian.org/debian/
+                --resolve-deps bionic /chroots/arm64 http://azure.archive.ubuntu.com/ubuntu
 
     env:
       JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
@@ -374,7 +369,7 @@ jobs:
     name: Windows x64
     runs-on: "windows-latest"
     needs: prerequisites
-    if: needs.prerequisites.outputs.should_run != 'false' && needs.prerequisites.outputs.platform_windows_x64 != 'false'
+    if: never()
 
     strategy:
       fail-fast: false
@@ -661,7 +656,7 @@ jobs:
     name: macOS x64
     runs-on: "macos-latest"
     needs: prerequisites
-    if: needs.prerequisites.outputs.should_run != 'false' && needs.prerequisites.outputs.platform_macos_x64 != 'false'
+    if: never()
 
     strategy:
       fail-fast: false
