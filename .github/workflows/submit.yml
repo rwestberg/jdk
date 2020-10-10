@@ -104,15 +104,36 @@ jobs:
       matrix:
         flavor:
           - build hotspot aarch64
+          - build hotspot ppc64el
+          - build hotspot s390x
         include:
           - flavor: build hotspot aarch64
-            cc: CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++
             flags: --enable-debug --disable-precompiled-headers --openjdk-target=aarch64-linux-gnu --with-sysroot=/chroots/arm64/ --with-toolchain-path=/chroots/arm64/
+            build-target: hotspot
+            cc: CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++
             deps: >
               sudo apt-get install g++-aarch64-linux-gnu gcc-aarch64-linux-gnu debootstrap qemu-user-static && 
               sudo qemu-debootstrap --arch=arm64 --verbose
               --include=fakeroot,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev
-              --resolve-deps bionic /chroots/arm64
+              --resolve-deps bionic /chroots/arm64 http://azure.ports.ubuntu.com
+          - flavor: build hotspot ppc64el
+            flags: --enable-debug --disable-precompiled-headers --openjdk-target=powerpc64le-linux-gnu --with-sysroot=/chroots/ppc64el/ --with-toolchain-path=/chroots/ppc64el/
+            build-target: hotspot
+            cc: CC=powerpc64le-linux-gnu-gcc CXX=powerpc64le-linux-gnu-g++
+            deps: >
+              sudo apt-get install g++-powerpc64le-linux-gnu gcc-powerpc64le-linux-gnu debootstrap qemu-user-static && 
+              sudo qemu-debootstrap --arch=ppc64el --verbose
+              --include=fakeroot,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev
+              --resolve-deps bionic /chroots/ppc64el http://azure.ports.ubuntu.com
+          - flavor: build hotspot s390x
+            flags: --enable-debug --disable-precompiled-headers --openjdk-target=s390x-linux-gnu --with-sysroot=/chroots/s390x/ --with-toolchain-path=/chroots/s390x/
+            build-target: hotspot
+            cc: CC=s390x-linux-gnu-gcc CXX=s390x-linux-gnu-g++
+            deps: >
+              sudo apt-get install g++-s390x-linux-gnu gcc-s390x-linux-gnu debootstrap qemu-user-static && 
+              sudo qemu-debootstrap --arch=s390x --verbose
+              --include=fakeroot,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev
+              --resolve-deps bionic /chroots/s390x http://azure.ports.ubuntu.com
 
     env:
       JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
