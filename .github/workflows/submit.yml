@@ -9,7 +9,7 @@ on:
       platforms:
         description: "Platform(s) to execute on"
         required: true
-        default: "Linux x64 (hotspot only), Linux x64, Linux x86, Windows x64, macOS x64"
+        default: "Linux multiple (hotspot only), Linux x64, Linux x86, Windows x64, macOS x64"
 
 jobs:
   prerequisites:
@@ -33,7 +33,7 @@ jobs:
       - name: Check which platforms should be included
         id: check_platforms
         run: |
-          echo "::set-output name=platform_linux_x64_hotspot_only::${{ contains(github.event.inputs.platforms, 'linux x64 (hotspot only)') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'linux x64 (hotspot only)'))) }}"
+          echo "::set-output name=platform_linux_x64_hotspot_only::${{ contains(github.event.inputs.platforms, 'linux multiple (hotspot only)') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'linux multiple (hotspot only)'))) }}"
           echo "::set-output name=platform_linux_x64::${{ contains(github.event.inputs.platforms, 'linux x64') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'linux x64'))) }}"
           echo "::set-output name=platform_linux_x86::${{ contains(github.event.inputs.platforms, 'linux x86') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'linux x86'))) }}"
           echo "::set-output name=platform_windows_x64::${{ contains(github.event.inputs.platforms, 'windows x64') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'windows x64'))) }}"
@@ -378,7 +378,7 @@ jobs:
         continue-on-error: true
 
   linux_x64_hotspot_only:
-    name: Linux x64 (build hotspot)
+    name: Linux multiple
     runs-on: "ubuntu-20.04"
     needs: 
       - prerequisites
@@ -389,37 +389,37 @@ jobs:
       fail-fast: false
       matrix:
         flavor:
-          - x64
-          - x64 zero
-          - x64 minimal
-          - x64 optimized
-          - aarch64
-          - arm
-          - s390x
-          - ppc64le
+          - hs x64 build only
+          - hs x64 zero build only
+          - hs x64 minimal build only
+          - hs x64 optimized build only
+          - hs aarch64 build only
+          - hs arm build only
+          - hs s390x build only
+          - hs ppc64le build only
         include:
-          - flavor: x64
+          - flavor: hs x64 build only
             flags: --enable-debug --disable-precompiled-headers
-          - flavor: x64 zero
+          - flavor: hs x64 zero build only
             flags: --enable-debug --disable-precompiled-headers --with-jvm-variants=zero
-          - flavor: x64 minimal
+          - flavor: hs x64 minimal build only
             flags: --enable-debug --disable-precompiled-headers --with-jvm-variants=minimal
-          - flavor: x64 optimized
+          - flavor: hs x64 optimized build only
             flags: --with-debug-level=optimized --disable-precompiled-headers
-          - flavor: aarch64
+          - flavor: hs aarch64 build only
             flags: --enable-debug --disable-precompiled-headers
             debian-arch: arm64
             gnu-arch: aarch64
-          - flavor: arm
+          - flavor: hs arm build only
             flags: --enable-debug --disable-precompiled-headers
             debian-arch: armhf
             gnu-arch: arm
             gnu-flavor: eabihf
-          - flavor: s390x
+          - flavor: hs s390x build only
             flags: --enable-debug --disable-precompiled-headers
             debian-arch: s390x
             gnu-arch: s390x
-          - flavor: ppc64le
+          - flavor: hs ppc64le build only
             flags: --enable-debug --disable-precompiled-headers
             debian-arch: ppc64el
             gnu-arch: powerpc64le
