@@ -1447,7 +1447,7 @@ jobs:
     continue-on-error: true
     needs:
       - prerequisites
-      - linux_x64_build_hotspot
+      - linux_x64_hotspot_only
       - linux_x64_test
       - linux_x86_test
       - windows_x64_test
