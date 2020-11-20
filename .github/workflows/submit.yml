@@ -9,7 +9,7 @@ on:
       platforms:
         description: "Platform(s) to execute on"
         required: true
-        default: "Linux aarch64, Linux arm, Linux ppc64le, Linux s390x, Linux x64, Linux x86, Windows x64, macOS x64"
+        default: "Linux x64 (hotspot only), Linux x64, Linux x86, Windows x64, macOS x64"
 
 jobs:
   prerequisites:
@@ -18,12 +18,9 @@ jobs:
     outputs:
       should_run: ${{ steps.check_submit.outputs.should_run }}
       bundle_id: ${{ steps.check_bundle_id.outputs.bundle_id }}
-      platform_linux_aarch64: ${{ steps.check_platforms.outputs.platform_linux_aarch64 }}
-      platform_linux_arm: ${{ steps.check_platforms.outputs.platform_linux_arm }}
-      platform_linux_ppc64le: ${{ steps.check_platforms.outputs.platform_linux_ppc64le }}
-      platform_linux_s390x: ${{ steps.check_platforms.outputs.platform_linux_s390x }}
-      platform_linux_x86: ${{ steps.check_platforms.outputs.platform_linux_x86 }}
+      platform_linux_x64_hotspot_only: ${{ steps.check_platforms.outputs.platform_linux_x64_hotspot_only }}
       platform_linux_x64: ${{ steps.check_platforms.outputs.platform_linux_x64 }}
+      platform_linux_x86: ${{ steps.check_platforms.outputs.platform_linux_x86 }}
       platform_windows_x64: ${{ steps.check_platforms.outputs.platform_windows_x64 }}
       platform_macos_x64: ${{ steps.check_platforms.outputs.platform_macos_x64 }}
       dependencies: ${{ steps.check_deps.outputs.dependencies }}
@@ -36,10 +33,7 @@ jobs:
       - name: Check which platforms should be included
         id: check_platforms
         run: |
-          echo "::set-output name=platform_linux_aarch64::${{ contains(github.event.inputs.platforms, 'linux aarch64') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'linux aarch64'))) }}"
-          echo "::set-output name=platform_linux_arm::${{ contains(github.event.inputs.platforms, 'linux arm') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'linux arm'))) }}"
-          echo "::set-output name=platform_linux_ppc64le::${{ contains(github.event.inputs.platforms, 'linux ppc64le') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'linux ppc64le'))) }}"
-          echo "::set-output name=platform_linux_s390x::${{ contains(github.event.inputs.platforms, 'linux s390x') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'linux s390x'))) }}"
+          echo "::set-output name=platform_linux_x64_hotspot_only::${{ contains(github.event.inputs.platforms, 'linux x64 (hotspot only)') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'linux x64 (hotspot only)'))) }}"
           echo "::set-output name=platform_linux_x64::${{ contains(github.event.inputs.platforms, 'linux x64') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'linux x64'))) }}"
           echo "::set-output name=platform_linux_x86::${{ contains(github.event.inputs.platforms, 'linux x86') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'linux x86'))) }}"
           echo "::set-output name=platform_windows_x64::${{ contains(github.event.inputs.platforms, 'windows x64') || (github.event.inputs.platforms == '' && (secrets.JDK_SUBMIT_PLATFORMS == '' || contains(secrets.JDK_SUBMIT_PLATFORMS, 'windows x64'))) }}"
@@ -108,7 +102,7 @@ jobs:
     name: Linux x64
     runs-on: "ubuntu-20.04"
     needs: prerequisites
-    if: needs.prerequisites.outputs.should_run != 'false' && needs.prerequisites.outputs.platform_linux_x64 != 'false'
+    if: needs.prerequisites.outputs.should_run != 'false' && (needs.prerequisites.outputs.platform_linux_x64 != 'false' || needs.prerequisites.outputs.platform_linux_x64_hotspot_only == 'true')
 
     strategy:
       fail-fast: false
@@ -193,7 +187,7 @@ jobs:
         working-directory: jdk
 
       - name: Build
-        run: make CONF_NAME=linux-x64 ${{ matrix.build-target }}
+        run: make CONF_NAME=linux-x64
         working-directory: jdk
 
       - name: Persist test bundles
@@ -203,7 +197,6 @@ jobs:
           path: |
             jdk/build/linux-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin${{ matrix.artifact }}.tar.gz
             jdk/build/linux-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin-tests${{ matrix.artifact }}.tar.gz
-        if: matrix.build-target == false
 
   linux_x64_test:
     name: Linux x64
@@ -384,13 +377,13 @@ jobs:
           path: ~/linux-x64${{ matrix.artifact }}_testsupport_${{ env.logsuffix }}.zip
         continue-on-error: true
 
-  linux_x64_build_hotspot:
+  linux_x64_hotspot_only:
     name: Linux x64 (build hotspot)
     runs-on: "ubuntu-20.04"
     needs: 
       - prerequisites
       - linux_x64_build
-    if: needs.prerequisites.outputs.should_run != 'false' && needs.prerequisites.outputs.platform_linux_x64 != 'false'
+    if: needs.prerequisites.outputs.should_run != 'false' && needs.prerequisites.outputs.platform_linux_x64_hotspot_only != 'false'
 
     strategy:
       fail-fast: false
@@ -647,7 +640,7 @@ jobs:
         working-directory: jdk
 
       - name: Build
-        run: make CONF_NAME=linux-x86 ${{ matrix.build-target }}
+        run: make CONF_NAME=linux-x86
         working-directory: jdk
 
       - name: Persist test bundles
@@ -657,7 +650,6 @@ jobs:
           path: |
             jdk/build/linux-x86/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x86_bin${{ matrix.artifact }}.tar.gz
             jdk/build/linux-x86/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x86_bin-tests${{ matrix.artifact }}.tar.gz
-        if: matrix.build-target == false
 
   linux_x86_test:
     name: Linux x86
@@ -948,7 +940,7 @@ jobs:
         run: |
           $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
           $env:Path = $env:Path -split ";" -match "C:\\Windows|PowerShell|cygwin" -join ";" ;
-          & make CONF_NAME=windows-x64 ${{ matrix.build-target }}
+          & make CONF_NAME=windows-x64
         working-directory: jdk
 
       - name: Persist test bundles
@@ -959,7 +951,6 @@ jobs:
             jdk/build/windows-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}.zip
             jdk/build/windows-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin-tests${{ matrix.artifact }}.tar.gz
             jdk/build/windows-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_windows-x64_bin${{ matrix.artifact }}-symbols.tar.gz
-        if: matrix.build-target == false
 
   windows_x64_test:
     name: Windows x64
@@ -1253,7 +1244,7 @@ jobs:
         working-directory: jdk
 
       - name: Build
-        run: make CONF_NAME=macos-x64 ${{ matrix.build-target }}
+        run: make CONF_NAME=macos-x64
         working-directory: jdk
 
       - name: Persist test bundles
@@ -1263,7 +1254,6 @@ jobs:
           path: |
             jdk/build/macos-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_osx-x64_bin${{ matrix.artifact }}.tar.gz
             jdk/build/macos-x64/bundles/jdk-${{ env.JDK_VERSION }}-internal+0_osx-x64_bin-tests${{ matrix.artifact }}.tar.gz
-        if: matrix.build-target == false
 
   macos_x64_test:
     name: macOS x64
