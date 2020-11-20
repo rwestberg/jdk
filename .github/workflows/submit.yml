@@ -1457,14 +1457,11 @@ jobs:
     continue-on-error: true
     needs:
       - prerequisites
-      - linux_aarch64_build
-      - linux_arm_build
-      - linux_ppc64le_build
-      - linux_s390x_build
+      - linux_x64_build_hotspot
       - linux_x64_test
       - linux_x86_test
       - windows_x64_test
-      - macos_x64_test
+      - macos_x64_test      
 
     steps:
       - name: Determine current artifacts endpoint
