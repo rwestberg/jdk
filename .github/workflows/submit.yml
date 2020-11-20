@@ -116,26 +116,10 @@ jobs:
         flavor:
           - build release
           - build debug
-          - build hotspot no-pch
-          - build hotspot zero
-          - build hotspot minimal
-          - build hotspot optimized
         include:
           - flavor: build debug
             flags: --enable-debug
             artifact: -debug
-          - flavor: build hotspot no-pch
-            flags: --enable-debug --disable-precompiled-headers
-            build-target: hotspot
-          - flavor: build hotspot zero
-            flags: --enable-debug --disable-precompiled-headers --with-jvm-variants=zero
-            build-target: hotspot
-          - flavor: build hotspot minimal
-            flags: --enable-debug --disable-precompiled-headers --with-jvm-variants=minimal
-            build-target: hotspot
-          - flavor: build hotspot optimized
-            flags: --with-debug-level=optimized --disable-precompiled-headers
-            build-target: hotspot
 
     env:
       JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
@@ -400,24 +384,52 @@ jobs:
           path: ~/linux-x64${{ matrix.artifact }}_testsupport_${{ env.logsuffix }}.zip
         continue-on-error: true
 
-  linux_aarch64_build:
-    name: Linux aarch64
+  linux_x64_build_hotspot:
+    name: Linux x64 (build hotspot)
     runs-on: "ubuntu-20.04"
-    needs:
+    needs: 
       - prerequisites
       - linux_x64_build
-    if: needs.prerequisites.outputs.should_run != 'false' && needs.prerequisites.outputs.platform_linux_aarch64 != 'false'
+    if: needs.prerequisites.outputs.should_run != 'false' && needs.prerequisites.outputs.platform_linux_x64 != 'false'
 
     strategy:
       fail-fast: false
       matrix:
         flavor:
-          - build hotspot no-pch
+          - x64
+          - x64 zero
+          - x64 minimal
+          - x64 optimized
+          - aarch64
+          - arm
+          - s390x
+          - ppc64le
         include:
-          - flavor: build hotspot no-pch
+          - flavor: x64
             flags: --enable-debug --disable-precompiled-headers
-            artifact: -debug
-            build-target: hotspot
+          - flavor: x64 zero
+            flags: --enable-debug --disable-precompiled-headers --with-jvm-variants=zero
+          - flavor: x64 minimal
+            flags: --enable-debug --disable-precompiled-headers --with-jvm-variants=minimal
+          - flavor: x64 optimized
+            flags: --with-debug-level=optimized --disable-precompiled-headers
+          - flavor: aarch64
+            flags: --enable-debug --disable-precompiled-headers
+            debian-arch: arm64
+            gnu-arch: aarch64
+          - flavor: arm
+            flags: --enable-debug --disable-precompiled-headers
+            debian-arch: armhf
+            gnu-arch: arm
+            gnu-flavor: eabihf
+          - flavor: s390x
+            flags: --enable-debug --disable-precompiled-headers
+            debian-arch: s390x
+            gnu-arch: s390x
+          - flavor: ppc64le
+            flags: --enable-debug --disable-precompiled-headers
+            debian-arch: ppc64el
+            gnu-arch: powerpc64le
 
     env:
       JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
@@ -456,143 +468,14 @@ jobs:
           path: ~/jdk-linux-x64
         continue-on-error: true
 
-      - name: Unpack jdk
-        run: |
-          mkdir -p "${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin"
-          tar -xf "${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin.tar.gz" -C "${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin"
-
-      - name: Find root of build JDK image dir
-        run: |
-          build_jdk_root=`find ${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin -name release -type f`
-          echo "build_jdk_root=`dirname ${build_jdk_root}`" >> $GITHUB_ENV
-
-      - name: Install cross-compilation host dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install g++-aarch64-linux-gnu gcc-aarch64-linux-gnu
-
-      - name: Cache sysroot
-        id: cache-sysroot
-        uses: actions/cache@v2
-        with:
-          path: ~/sysroot-arm64/
-          key: sysroot-arm64-${{ hashFiles('jdk/.github/workflows/submit.yml') }}
-
-      - name: Install sysroot host dependencies
-        run: |
-          sudo apt-get install debootstrap qemu-user-static
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Create sysroot
-        run: >
-          sudo qemu-debootstrap
-          --arch=arm64
-          --verbose
-          --include=fakeroot,symlinks,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev
-          --resolve-deps
-          buster
-          ~/sysroot-arm64
-          http://httpredir.debian.org/debian/
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Relativize symlinks in sysroot
-        run: >
-          sudo chroot ~/sysroot-arm64 symlinks -cr .
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Fix permissions in sysroot
-        run: >
-          sudo chown ${USER} -R ~/sysroot-arm64
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Remove special directories in sysroot
-        run: >
-          rm -rf ~/sysroot-arm64/{dev,proc,run,sys}
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Configure
-        env:
-          CC: aarch64-linux-gnu-gcc
-          CXX: aarch64-linux-gnu-g++
-        run: >
-          bash configure
-          ${{ matrix.flags }}
-          --openjdk-target=aarch64-linux-gnu
-          --with-sysroot=${HOME}/sysroot-arm64/
-          --with-toolchain-path=${HOME}/sysroot-arm64/
-          --with-freetype-lib=${HOME}/sysroot-arm64/usr/lib/aarch64-linux-gnu/
-          --with-freetype-include=${HOME}/sysroot-arm64/usr/include/freetype2/
-          --x-libraries=${HOME}/sysroot-arm64/usr/lib/aarch64-linux-gnu/
-          --with-build-jdk=${{ env.build_jdk_root }}
-          --with-conf-name=linux-aarch64
-          --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA}
-          --with-version-build=0
-          --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}
-          --with-default-make-target="product-bundles test-bundles"
-          --with-zlib=system
-        working-directory: jdk
-
-      - name: Build
-        run: make CONF_NAME=linux-aarch64 ${{ matrix.build-target }}
-        working-directory: jdk
-
-  linux_arm_build:
-    name: Linux arm
-    runs-on: "ubuntu-20.04"
-    needs:
-      - prerequisites
-      - linux_x64_build
-    if: needs.prerequisites.outputs.should_run != 'false' && needs.prerequisites.outputs.platform_linux_arm != 'false'
-
-    strategy:
-      fail-fast: false
-      matrix:
-        flavor:
-          - build hotspot no-pch
-        include:
-          - flavor: build hotspot no-pch
-            flags: --enable-debug --disable-precompiled-headers
-            artifact: -debug
-            build-target: hotspot
-
-    env:
-      JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
-      BOOT_JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).BOOT_JDK_VERSION }}"
-      BOOT_JDK_FILENAME: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_FILENAME }}"
-      BOOT_JDK_URL: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_URL }}"
-      BOOT_JDK_SHA256: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_SHA256 }}"
-
-    steps:
-      - name: Checkout the source
-        uses: actions/checkout@v2
-        with:
-          path: jdk
-
-      - name: Restore boot JDK from cache
-        id: bootjdk
-        uses: actions/cache@v2
-        with:
-          path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-${{ env.BOOT_JDK_SHA256 }}-v1
-
-      - name: Download boot JDK
-        run: |
-          mkdir -p "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
-          wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
-          echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
-          tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
-          mv "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"*/* "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"
-        if: steps.bootjdk.outputs.cache-hit != 'true'
-
-      - name: Restore build JDK
-        id: build_restore
+      - name: Restore build JDK (retry)
         uses: actions/download-artifact@v2
         with:
           name: transient_jdk-linux-x64_${{ needs.prerequisites.outputs.bundle_id }}
           path: ~/jdk-linux-x64
-        continue-on-error: true
+        if: steps.build_restore.outcome == 'failure'
 
-      - name: Unpack jdk
+      - name: Unpack build JDK
         run: |
           mkdir -p "${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin"
           tar -xf "${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin.tar.gz" -C "${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin"
@@ -602,346 +485,70 @@ jobs:
           build_jdk_root=`find ${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin -name release -type f`
           echo "build_jdk_root=`dirname ${build_jdk_root}`" >> $GITHUB_ENV
 
-      - name: Install cross-compilation host dependencies
+      - name: Install native host dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install g++-arm-linux-gnueabihf gcc-arm-linux-gnueabihf
+          sudo apt-get install gcc-10=10.2.0-5ubuntu1~20.04 g++-10=10.2.0-5ubuntu1~20.04 libxrandr-dev libxtst-dev libcups2-dev libasound2-dev
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 100 --slave /usr/bin/g++ g++ /usr/bin/g++-10
+        if: matrix.debian-arch == ''
+
+      - name: Install cross-compilation host dependencies
+        run: sudo apt-get install gcc-${{ matrix.gnu-arch}}-linux-gnu${{ matrix.gnu-flavor}} g++-${{ matrix.gnu-arch}}-linux-gnu${{ matrix.gnu-flavor}}
+        if: matrix.debian-arch != ''
 
       - name: Cache sysroot
         id: cache-sysroot
         uses: actions/cache@v2
         with:
-          path: ~/sysroot-armhf/
-          key: sysroot-armhf-${{ hashFiles('jdk/.github/workflows/submit.yml') }}
+          path: ~/sysroot-${{ matrix.debian-arch}}/
+          key: sysroot-${{ matrix.debian-arch}}-${{ hashFiles('jdk/.github/workflows/submit.yml') }}
+        if: matrix.debian-arch != ''
 
       - name: Install sysroot host dependencies
-        run: |
-          sudo apt-get install debootstrap qemu-user-static
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
+        run: sudo apt-get install debootstrap qemu-user-static
+        if: matrix.debian-arch != '' && steps.cache-sysroot.outputs.cache-hit != 'true'
 
       - name: Create sysroot
         run: >
           sudo qemu-debootstrap
-          --arch=armhf
+          --arch=${{ matrix.debian-arch}}
           --verbose
           --include=fakeroot,symlinks,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev
           --resolve-deps
           buster
-          ~/sysroot-armhf
+          ~/sysroot-${{ matrix.debian-arch}}
           http://httpredir.debian.org/debian/
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
+        if: matrix.debian-arch != '' && steps.cache-sysroot.outputs.cache-hit != 'true'
 
-      - name: Relativize symlinks in sysroot
-        run: >
-          sudo chroot ~/sysroot-armhf symlinks -cr .
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
+      - name: Prepare sysroot for caching
+        run: |
+          sudo chroot ~/sysroot-${{ matrix.debian-arch}} symlinks -cr .
+          sudo chown ${USER} -R ~/sysroot-${{ matrix.debian-arch}}
+          rm -rf ~/sysroot-${{ matrix.debian-arch}}/{dev,proc,run,sys}
+        if: matrix.debian-arch != '' && steps.cache-sysroot.outputs.cache-hit != 'true'
 
-      - name: Fix permissions in sysroot
-        run: >
-          sudo chown ${USER} -R ~/sysroot-armhf
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Remove special directories in sysroot
-        run: >
-          rm -rf ~/sysroot-armhf/{dev,proc,run,sys}
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
+      - name: Configure cross-specific flags
+        run: |
+          echo "CC=${{ matrix.gnu-arch}}-linux-gnu${{ matrix.gnu-flavor}}-gcc" >> $GITHUB_ENV
+          echo "CXX=${{ matrix.gnu-arch}}-linux-gnu${{ matrix.gnu-flavor}}-g++" >> $GITHUB_ENV
+          echo "cross_flags=--openjdk-target=${{ matrix.gnu-arch}}-linux-gnu${{ matrix.gnu-flavor}} --with-sysroot=${HOME}/sysroot-${{ matrix.debian-arch}}/ --with-toolchain-path=${HOME}/sysroot-${{ matrix.debian-arch}}/ --with-freetype-lib=${HOME}/sysroot-${{ matrix.debian-arch}}/usr/lib/${{ matrix.gnu-arch}}-linux-gnu${{ matrix.gnu-flavor}}/ --with-freetype-include=${HOME}/sysroot-${{ matrix.debian-arch}}/usr/include/freetype2/ --x-libraries=${HOME}/sysroot-${{ matrix.debian-arch}}/usr/lib/${{ matrix.gnu-arch}}-linux-gnu${{ matrix.gnu-flavor}}/" >> $GITHUB_ENV
+        if: matrix.debian-arch != ''
 
       - name: Configure
-        env:
-          CC: arm-linux-gnueabihf-gcc
-          CXX: arm-linux-gnueabihf-g++
         run: >
           bash configure
+          --with-conf-name=linux-x64-hotspot
           ${{ matrix.flags }}
-          --openjdk-target=arm-linux-gnueabihf
-          --with-sysroot=${HOME}/sysroot-armhf/
-          --with-toolchain-path=${HOME}/sysroot-armhf/
-          --with-freetype-lib=${HOME}/sysroot-armhf/usr/lib/arm-linux-gnueabihf/
-          --with-freetype-include=${HOME}/sysroot-armhf/usr/include/freetype2/
-          --x-libraries=${HOME}/sysroot-armhf/usr/lib/arm-linux-gnueabihf/
-          --with-build-jdk=${{ env.build_jdk_root }}
-          --with-conf-name=linux-arm
+          ${{ env.cross_flags }}
           --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA}
           --with-version-build=0
           --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}
-          --with-default-make-target="product-bundles test-bundles"
+          --with-build-jdk=${{ env.build_jdk_root }}
+          --with-default-make-target="hotspot"
           --with-zlib=system
         working-directory: jdk
 
       - name: Build
-        run: make CONF_NAME=linux-arm ${{ matrix.build-target }}
-        working-directory: jdk
-
-  linux_s390x_build:
-    name: Linux s390x
-    runs-on: "ubuntu-20.04"
-    needs:
-      - prerequisites
-      - linux_x64_build
-    if: needs.prerequisites.outputs.should_run != 'false' && needs.prerequisites.outputs.platform_linux_s390x != 'false'
-
-    strategy:
-      fail-fast: false
-      matrix:
-        flavor:
-          - build hotspot no-pch
-        include:
-          - flavor: build hotspot no-pch
-            flags: --enable-debug --disable-precompiled-headers
-            artifact: -debug
-            build-target: hotspot
-
-    env:
-      JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
-      BOOT_JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).BOOT_JDK_VERSION }}"
-      BOOT_JDK_FILENAME: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_FILENAME }}"
-      BOOT_JDK_URL: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_URL }}"
-      BOOT_JDK_SHA256: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_SHA256 }}"
-
-    steps:
-      - name: Checkout the source
-        uses: actions/checkout@v2
-        with:
-          path: jdk
-
-      - name: Restore boot JDK from cache
-        id: bootjdk
-        uses: actions/cache@v2
-        with:
-          path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-${{ env.BOOT_JDK_SHA256 }}-v1
-
-      - name: Download boot JDK
-        run: |
-          mkdir -p "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
-          wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
-          echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
-          tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
-          mv "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"*/* "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"
-        if: steps.bootjdk.outputs.cache-hit != 'true'
-
-      - name: Restore build JDK
-        id: build_restore
-        uses: actions/download-artifact@v2
-        with:
-          name: transient_jdk-linux-x64_${{ needs.prerequisites.outputs.bundle_id }}
-          path: ~/jdk-linux-x64
-        continue-on-error: true
-
-      - name: Unpack jdk
-        run: |
-          mkdir -p "${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin"
-          tar -xf "${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin.tar.gz" -C "${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin"
-
-      - name: Find root of build JDK image dir
-        run: |
-          build_jdk_root=`find ${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin -name release -type f`
-          echo "build_jdk_root=`dirname ${build_jdk_root}`" >> $GITHUB_ENV
-
-      - name: Install cross-compilation host dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install g++-s390x-linux-gnu gcc-s390x-linux-gnu
-
-      - name: Cache sysroot
-        id: cache-sysroot
-        uses: actions/cache@v2
-        with:
-          path: ~/sysroot-s390x/
-          key: sysroot-s390x-${{ hashFiles('jdk/.github/workflows/submit.yml') }}
-
-      - name: Install sysroot host dependencies
-        run: |
-          sudo apt-get install debootstrap qemu-user-static
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Create sysroot
-        run: >
-          sudo qemu-debootstrap
-          --arch=s390x
-          --verbose
-          --include=fakeroot,symlinks,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev
-          --resolve-deps
-          buster
-          ~/sysroot-s390x
-          http://httpredir.debian.org/debian/
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Relativize symlinks in sysroot
-        run: >
-          sudo chroot ~/sysroot-s390x symlinks -cr .
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Fix permissions in sysroot
-        run: >
-          sudo chown ${USER} -R ~/sysroot-s390x
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Remove special directories in sysroot
-        run: >
-          rm -rf ~/sysroot-s390x/{dev,proc,run,sys}
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Configure
-        env:
-          CC: s390x-linux-gnu-gcc
-          CXX: s390x-linux-gnu-g++
-        run: >
-          bash configure
-          ${{ matrix.flags }}
-          --openjdk-target=s390x-linux-gnu
-          --with-sysroot=${HOME}/sysroot-s390x/
-          --with-toolchain-path=${HOME}/sysroot-s390x/
-          --with-freetype-lib=${HOME}/sysroot-s390x/usr/lib/s390x-linux-gnu/
-          --with-freetype-include=${HOME}/sysroot-s390x/usr/include/freetype2/
-          --x-libraries=${HOME}/sysroot-s390x/usr/lib/s390x-linux-gnu/
-          --with-build-jdk=${{ env.build_jdk_root }}
-          --with-conf-name=linux-s390x
-          --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA}
-          --with-version-build=0
-          --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}
-          --with-default-make-target="product-bundles test-bundles"
-          --with-zlib=system
-        working-directory: jdk
-
-      - name: Build
-        run: make CONF_NAME=linux-s390x ${{ matrix.build-target }}
-        working-directory: jdk
-
-  linux_ppc64le_build:
-    name: Linux ppc64le
-    runs-on: "ubuntu-20.04"
-    needs:
-      - prerequisites
-      - linux_x64_build
-    if: needs.prerequisites.outputs.should_run != 'false' && needs.prerequisites.outputs.platform_linux_ppc64le != 'false'
-
-    strategy:
-      fail-fast: false
-      matrix:
-        flavor:
-          - build hotspot no-pch
-        include:
-          - flavor: build hotspot no-pch
-            flags: --enable-debug --disable-precompiled-headers
-            artifact: -debug
-            build-target: hotspot
-
-    env:
-      JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).DEFAULT_VERSION_FEATURE }}"
-      BOOT_JDK_VERSION: "${{ fromJson(needs.prerequisites.outputs.dependencies).BOOT_JDK_VERSION }}"
-      BOOT_JDK_FILENAME: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_FILENAME }}"
-      BOOT_JDK_URL: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_URL }}"
-      BOOT_JDK_SHA256: "${{ fromJson(needs.prerequisites.outputs.dependencies).LINUX_X64_BOOT_JDK_SHA256 }}"
-
-    steps:
-      - name: Checkout the source
-        uses: actions/checkout@v2
-        with:
-          path: jdk
-
-      - name: Restore boot JDK from cache
-        id: bootjdk
-        uses: actions/cache@v2
-        with:
-          path: ~/bootjdk/${{ env.BOOT_JDK_VERSION }}
-          key: bootjdk-${{ runner.os }}-${{ env.BOOT_JDK_VERSION }}-${{ env.BOOT_JDK_SHA256 }}-v1
-
-      - name: Download boot JDK
-        run: |
-          mkdir -p "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
-          wget -O "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" "${BOOT_JDK_URL}"
-          echo "${BOOT_JDK_SHA256} ${HOME}/bootjdk/${BOOT_JDK_FILENAME}" | sha256sum -c >/dev/null -
-          tar -xf "${HOME}/bootjdk/${BOOT_JDK_FILENAME}" -C "${HOME}/bootjdk/${BOOT_JDK_VERSION}"
-          mv "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"*/* "${HOME}/bootjdk/${BOOT_JDK_VERSION}/"
-        if: steps.bootjdk.outputs.cache-hit != 'true'
-
-      - name: Restore build JDK
-        id: build_restore
-        uses: actions/download-artifact@v2
-        with:
-          name: transient_jdk-linux-x64_${{ needs.prerequisites.outputs.bundle_id }}
-          path: ~/jdk-linux-x64
-        continue-on-error: true
-
-      - name: Unpack jdk
-        run: |
-          mkdir -p "${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin"
-          tar -xf "${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin.tar.gz" -C "${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin"
-
-      - name: Find root of build JDK image dir
-        run: |
-          build_jdk_root=`find ${HOME}/jdk-linux-x64/jdk-${{ env.JDK_VERSION }}-internal+0_linux-x64_bin -name release -type f`
-          echo "build_jdk_root=`dirname ${build_jdk_root}`" >> $GITHUB_ENV
-
-      - name: Install cross-compilation host dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install g++-powerpc64le-linux-gnu gcc-powerpc64le-linux-gnu:
-
-      - name: Cache sysroot
-        id: cache-sysroot
-        uses: actions/cache@v2
-        with:
-          path: ~/sysroot-ppc64el/
-          key: sysroot-ppc64el-${{ hashFiles('jdk/.github/workflows/submit.yml') }}
-
-      - name: Install sysroot host dependencies
-        run: |
-          sudo apt-get install debootstrap qemu-user-static
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Create sysroot
-        run: >
-          sudo qemu-debootstrap
-          --arch=ppc64el
-          --verbose
-          --include=fakeroot,symlinks,build-essential,libx11-dev,libxext-dev,libxrender-dev,libxrandr-dev,libxtst-dev,libxt-dev,libcups2-dev,libfontconfig1-dev,libasound2-dev,libfreetype6-dev,libpng-dev
-          --resolve-deps
-          buster
-          ~/sysroot-ppc64el
-          http://httpredir.debian.org/debian/
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Relativize symlinks in sysroot
-        run: >
-          sudo chroot ~/sysroot-ppc64el symlinks -cr .
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Fix permissions in sysroot
-        run: >
-          sudo chown ${USER} -R ~/sysroot-ppc64el
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Remove special directories in sysroot
-        run: >
-          rm -rf ~/sysroot-ppc64el/{dev,proc,run,sys}
-        if: steps.cache-sysroot.outputs.cache-hit != 'true'
-
-      - name: Configure
-        env:
-          CC: powerpc64le-linux-gnu-gcc
-          CXX: powerpc64le-linux-gnu-g++
-        run: >
-          bash configure
-          ${{ matrix.flags }}
-          --openjdk-target=powerpc64le-linux-gnu
-          --with-sysroot=${HOME}/sysroot-ppc64el/
-          --with-toolchain-path=${HOME}/sysroot-ppc64el/
-          --with-freetype-lib=${HOME}/sysroot-ppc64el/usr/lib/powerpc64le-linux-gnu/
-          --with-freetype-include=${HOME}/sysroot-ppc64el/usr/include/freetype2/
-          --x-libraries=${HOME}/sysroot-ppc64el/usr/lib/powerpc64le-linux-gnu/
-          --with-build-jdk=${{ env.build_jdk_root }}
-          --with-conf-name=linux-ppc64le
-          --with-version-opt=${GITHUB_ACTOR}-${GITHUB_SHA}
-          --with-version-build=0
-          --with-boot-jdk=${HOME}/bootjdk/${BOOT_JDK_VERSION}
-          --with-default-make-target="product-bundles test-bundles"
-          --with-zlib=system
-        working-directory: jdk
-
-      - name: Build
-        run: make CONF_NAME=linux-ppc64le ${{ matrix.build-target }}
+        run: make CONF_NAME=linux-x64-hotspot
         working-directory: jdk
 
   linux_x86_build:
