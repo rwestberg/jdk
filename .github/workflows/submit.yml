@@ -1047,10 +1047,12 @@ jobs:
       - name: Check logs 1
         if: always()
         run: type configure.log
+        working-directory: jdk
           
       - name: Check logs 2
         if: always()
         run: type config.log
+        working-directory: jdk
 
       - name: Build
         run: |
