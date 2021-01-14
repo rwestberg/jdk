@@ -368,7 +368,7 @@ AC_DEFUN([UTIL_LOOKUP_PROGS],
     fi
 
     for name in $2; do
-      AC_MSG_CHECKING(for $name)
+      AC_MSG_CHECKING(for $name in $PATH)
 
       command_type=`type -t "$name"`
       if test "x$command_type" = xbuiltin || test "x$command_type" = xkeyword; then
