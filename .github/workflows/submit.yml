@@ -1044,6 +1044,14 @@ jobs:
           --enable-jtreg-failure-handler
         working-directory: jdk
 
+      - name: Check logs 1
+        if: always()
+        run: type configure.log
+          
+      - name: Check logs 2
+        if: always()
+        run: type config.log
+
       - name: Build
         run: |
           $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
