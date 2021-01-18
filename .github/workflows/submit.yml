@@ -1054,6 +1054,16 @@ jobs:
         run: type config.log
         working-directory: jdk
 
+      - name: Check logs 3
+        if: always()
+        run: type .\build\windows-x64\configure-support\vs-env-x86_64\extract-vs-env.log
+        working-directory: jdk
+
+      - name: Check logs 4
+        if: always()
+        run: type .\build\windows-x64\configure-support\vs-env-x86_64\set-vs-env.sh
+        working-directory: jdk
+
       - name: Build
         run: |
           $env:Path = "$HOME\cygwin\cygwin64\bin;$HOME\cygwin\cygwin64\bin;$env:Path" ;
