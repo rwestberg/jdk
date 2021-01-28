@@ -1019,7 +1019,6 @@ jobs:
         if: steps.jtreg_restore.outcome == 'failure'
 
       - name: Ensure a specific version of MSVC is installed
-        shell: powershell
         run: >
           Start-Process -FilePath 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe' -Wait -NoNewWindow -ArgumentList
           'modify --installPath "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise" --quiet
